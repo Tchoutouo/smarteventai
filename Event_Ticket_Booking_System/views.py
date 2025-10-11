@@ -129,7 +129,7 @@ def ambassador_dashboard_view(request, secure_token):
     if request.user != profile.user:
         return render(request, 'access_denied.html', status=403)
 
-    # ✅ CORRIGÉ : utiliser 'ambassadors' (nom du champ ManyToMany)
+    # utiliser 'ambassadors' (nom du champ ManyToMany)
     events = Event.objects.filter(
         ambassadors=request.user,
         is_deleted=False
