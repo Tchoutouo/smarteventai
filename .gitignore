@@ -61,4 +61,4 @@ Thumbs.db
 .vscode/settings.json
 
 #Dump files
-dump.rdb
+db.sqlite3
