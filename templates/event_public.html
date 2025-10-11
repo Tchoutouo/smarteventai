@@ -22,6 +22,15 @@
         <div class="card-body">
           <h5 class="fw-bold mb-4">Détails de l'événement</h5>
 
+          <div class="row g-4">
+            <div class="col-lg-8">
+              {% if event.cover_image %}
+                <img src="{{ event.cover_image.url }}" class="img-fluid rounded-4 mb-4" alt="{{ event.title }}">
+              {% endif %}
+              <!-- ... description ... -->
+            </div>
+          </div>
+
           <ul class="list-group list-group-flush">
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <span>📅 Date</span>

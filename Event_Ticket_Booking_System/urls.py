@@ -22,6 +22,7 @@ from Event_Ticket_Booking_System.views import (
     add_ambassador_to_event,
     event_secure_detail,
     event_public_detail,
+complete_pending_reservation,
 )
 from user_service.views import (
     register_view,
@@ -30,6 +31,8 @@ from user_service.views import (
     profile_view,
     edit_profile_view,
 )
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -51,6 +54,7 @@ urlpatterns = [
     path('events/<int:event_id>/', event_detail_view, name='event-detail'),
     path('event/<int:event_id>/', event_public_detail, name='event_public_detail'),
     path('event/secured/<str:secure_token>/<int:event_id>/', event_secure_detail, name='event_secure_detail'),
+path('reservation/complete/', complete_pending_reservation, name='complete-pending-reservation'),
 
     # Auth
     path('register/', register_view, name='register'),
@@ -83,7 +87,7 @@ urlpatterns = [
     path('complaints/new/', complaint_form_view, name='complaint-form'),
 
     # Booking
-    path('events/<int:event_id>/book/<str:secure_token>/', book_ticket_view, name='book-ticket'),
+    path('events/<int:event_id>/book/', book_ticket_view, name='book-ticket'),
     path('booking-success/', booking_success_view, name='booking-success'),
 
 
@@ -92,3 +96,7 @@ urlpatterns = [
 ]
 
 handler404 = not_found_view
+
+# Servir les fichiers médias en développement
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

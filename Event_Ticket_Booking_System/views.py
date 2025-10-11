@@ -2,6 +2,8 @@ import io
 import os
 import qrcode, base64
 from io import BytesIO
+
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from datetime import datetime, timedelta, date
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.http import JsonResponse, HttpResponseForbidden, FileResponse
@@ -39,10 +41,11 @@ def home_view(request):
     return render(request, 'home.html', {'events': events})
 
 
-@login_required
+# @login_required
 def event_detail_view(request, event_id):
-    if not hasattr(request.user, 'userprofile') or request.user.userprofile.role != 'attendee':
-        return render(request, 'access_denied.html')
+    print("event_detail_view")
+    # if not hasattr(request.user, 'userprofile') or request.user.userprofile.role != 'attendee':
+    #     return render(request, 'access_denied.html')
     event = get_object_or_404(Event, id=event_id)
     ref_id = request.GET.get('ref')
     return render(request, 'event_detail.html', {'event': event, "ref_ambassador": ref_id})
@@ -69,7 +72,7 @@ def organizer_dashboard_view(request, secure_token):
 
     ambassadors = UserProfile.objects.filter(role="ambassador")
 
-    print(ambassadors)
+    # print(ambassadors)
 
     total_events = events.count()
     total_tickets = 0
@@ -235,6 +238,11 @@ def edit_event_view(request, secure_token, event_id):
         event.location = location
         event.ticket_price = ticket_price
         event.available_tickets = available_tickets
+
+        # Ajouter l'image de couverture si fournie
+        if 'cover_image' in request.FILES:
+            event.cover_image = request.FILES['cover_image']
+
         event.save()
 
         messages.success(request, "✅ Event updated successfully!", extra_tags="swal")
@@ -245,8 +253,9 @@ def edit_event_view(request, secure_token, event_id):
 
 def event_public_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
+    print("event_public_detail")
     ref_id = request.GET.get('ref')
-    print(ref_id)
+    # print(ref_id)
     return render(request, 'event_public.html',
                   {'event': event, "ref_ambassador": ref_id}
                   )
@@ -258,6 +267,7 @@ def event_secure_detail(request, secure_token, event_id):
 
     # 🔒 Vérification CRITIQUE : l'utilisateur connecté doit être le propriétaire du profil
     if request.user != profile.user:
+        print("event_secure_detail")
         return render(request, 'access_denied.html', status=403)
 
     event = get_object_or_404(Event, id=event_id)
@@ -336,7 +346,7 @@ def event_secure_detail(request, secure_token, event_id):
 
 
         ambassador_reservations = event.reservation_set.filter(ambassador=user)
-        print(ambassador_reservations)
+        # print(ambassador_reservations)
 
         nb_reservations = ambassador_reservations.count()
 
@@ -345,7 +355,7 @@ def event_secure_detail(request, secure_token, event_id):
         )['total'] or 0
 
         ambassador_revenue = ambassador_reservations.aggregate(total=Sum('total_price'))['total'] or 0
-        print(ambassador_revenue)
+        # print(ambassador_revenue)
 
         context['ambassador_reservations'] = nb_reservations
         context['ambassador_revenue'] = ambassador_revenue
@@ -403,7 +413,7 @@ def event_create_view(request, secure_token):
             messages.error(request, "Invalid date format.")
             return redirect('organizer-dashboard', secure_token=secure_token)
 
-        Event.objects.create(
+        event = Event.objects.create(
             title=title,
             description=description,
             location=location,
@@ -412,9 +422,17 @@ def event_create_view(request, secure_token):
             available_tickets=available_tickets,
             organizer=request.user
         )
+
+        # Ajouter l'image de couverture si fournie
+        if 'cover_image' in request.FILES:
+            event.cover_image = request.FILES['cover_image']
+
+        event.save()
         messages.success(request, "✅ Event added successfully!", extra_tags="swal")
 
     return redirect('organizer-dashboard', secure_token=secure_token)
+
+
 
 @login_required
 def supervisor_panel_view(request):
@@ -456,66 +474,266 @@ def search_view(request):
     })
 
 
+# views.py
 @login_required
-def book_ticket_view(request, event_id, secure_token):
-    try:
-        profile = UserProfile.objects.get(secure_token=secure_token)
-    except UserProfile.DoesNotExist:
-        return HttpResponseForbidden("Access denied")
+def complete_pending_reservation(request):
+    print("complete_pending_reservation")
+    if 'pending_reservation' not in request.session:
+        messages.error(request, "No pending reservation found.")
+        return redirect('organizer-dashboard')  # ou autre page
 
-    if request.user != profile.user or profile.role != "attendee":
-        return HttpResponseForbidden("Access denied")
+    data = request.session['pending_reservation']
+    # print(data)
+    event = get_object_or_404(Event, id=data['event_id'])
 
-    event = get_object_or_404(Event, id=event_id)
-
+    # Vérifier que la carte existe maintenant
     if not PaymentCard.objects.filter(user=request.user).exists():
-        messages.warning(request, "⚠️ No payment card on file. Redirecting...")
-        return render(request, 'redirect_to_payment.html', {
-            'secure_token': secure_token,
-        })
+        messages.error(request, "You must add a payment card first.")
+        return redirect('add-payment-card', secure_token=request.user.userprofile.secure_token)
+
+    # === Reprendre la réservation ===
+    qty = data['quantity']
+    if qty > event.available_tickets:
+        del request.session['pending_reservation']
+        messages.error(request, f"Only {event.available_tickets} tickets left.")
+        return redirect('event-public-detail', event_id=event.id)
+
+    # Ambassador
+    ambassador = None
+    ref_id = data.get('ref_id')
+    if ref_id and ref_id.isdigit():
+        if event.ambassadors.filter(id=ref_id).exists():
+            ambassador = get_object_or_404(User, id=ref_id)
+
+    # Créer la réservation
+    total = qty * event.ticket_price
+    reservation = Reservation.objects.create(
+        user=request.user,
+        event=event,
+        quantity=qty,
+        total_price=total,
+        ambassador=ambassador,
+        signature=f"{request.user.id}-{timezone.now().timestamp()}"
+    )
+
+    # Mettre à jour
+    event.available_tickets -= qty
+    event.save()
+
+    profile = request.user.userprofile
+    profile.total_tickets_reserved += qty
+    profile.save()
+
+    # Nettoyer la session
+    del request.session['pending_reservation']
+
+    request.session['reservation_id'] = reservation.id
+
+    request.session['booking_message'] = f"🎉 Reservation completed! {qty} ticket(s) for \"{event.title}\"."
+    return redirect('booking-success')
+
+
+# @login_required
+
+# def book_ticket_view(request, event_id):
+#
+#     # try:
+#     #     profile = UserProfile.objects.get(secure_token=secure_token)
+#     # except UserProfile.DoesNotExist:
+#     #     return HttpResponseForbidden("Access denied")
+#
+#     # if request.user != profile.user or profile.role != "attendee":
+#     #     return HttpResponseForbidden("Access denied")
+#
+#     event = get_object_or_404(Event, id=event_id)
+#
+#     if request.user and not PaymentCard.objects.filter(user=request.user).exists():
+#         profile = UserProfile.objects.get(user=request.user)
+#
+#         messages.warning(request, "⚠️ No payment card on file. Redirecting...")
+#         return render(request, 'redirect_to_payment.html', {
+#             'secure_token': profile.secure_token,
+#         })
+#
+#     if request.method == 'POST':
+#         # === 🔑 Récupérer et valider l'ambassador via ?ref=... ===
+#         ambassador = None
+#         ref_id = request.POST.get('ref')  # ou request.POST.get si tu passes en POST
+#         print(ref_id)
+#
+#         if ref_id and ref_id.isdigit():
+#             ref_id = int(ref_id)
+#             # Vérifie que cet utilisateur est bien un ambassador de cet événement
+#             if event.ambassadors.filter(id=ref_id).exists():
+#                 ambassador = get_object_or_404(User, id=ref_id)
+#
+#         qty = int(request.POST.get('quantity', 0))
+#         if qty <= 0:
+#             messages.error(request, "❌ Enter valid ticket quantity")
+#             return redirect('event-detail', event_id=event_id)
+#         if qty > event.available_tickets:
+#             messages.error(request, f"❌ Only {event.available_tickets} left")
+#             return redirect('event-detail', event_id=event_id)
+#
+#         total = qty * event.ticket_price
+#
+#         reservation = Reservation.objects.create(
+#             user=request.user,
+#             event=event,
+#             quantity=qty,
+#             total_price=total,
+#             ambassador=ambassador,
+#             signature=f"{request.user.id}-{timezone.now().timestamp()}"
+#         )
+#         request.session['reservation_id'] = reservation.id
+#
+#         event.available_tickets -= qty
+#         event.save()
+#         profile.total_tickets_reserved += reservation.quantity
+#         profile.save()
+#
+#         request.session['reservation_id'] = reservation.id
+#         request.session['booking_message'] = f"🎉 You booked {reservation.quantity} for \"{event.title}\"!"
+#         return redirect('booking-success')
+#
+#     return redirect('event-detail', event_id=event_id)
+#
+
+def book_ticket_view(request, event_id):
+    print("book_ticket_view")
+    event = get_object_or_404(Event, id=event_id, is_deleted=False)
+
+    if event.available_tickets <= 0:
+        messages.error(request, "❌ This event is sold out.")
+        return redirect('event-public-detail', event_id=event.id)
 
     if request.method == 'POST':
-        # === 🔑 Récupérer et valider l'ambassador via ?ref=... ===
-        ambassador = None
-        ref_id = request.POST.get('ref')  # ou request.POST.get si tu passes en POST
-        print(ref_id)
+        # Récupérer les données du formulaire
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip().lower()
+        qty = request.POST.get('quantity', '0')
+        ref_id = request.POST.get('ref', '').strip()
 
+        # Validation basique
+        if not (first_name and last_name and email):
+            messages.error(request, "❌ First name, last name, and email are required.")
+            return redirect('event-public-detail', event_id=event.id)
+
+        if not qty.isdigit() or int(qty) <= 0:
+            messages.error(request, "❌ Please enter a valid ticket quantity.")
+            return redirect('event-public-detail', event_id=event.id)
+
+        qty = int(qty)
+        if qty > event.available_tickets:
+            messages.error(request, f"❌ Only {event.available_tickets} tickets available.")
+            return redirect('event-public-detail', event_id=event.id)
+
+        # === 1. Gérer l'utilisateur (existant ou nouveau) ===
+        user = None
+        password = None
+        if request.user.is_authenticated:
+            # Cas : utilisateur déjà connecté
+            user = request.user
+        else:
+            # Cas : utilisateur non connecté → chercher ou créer
+            try:
+                # Chercher un utilisateur avec cet email
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                try:
+                    user = User.objects.get(username=email)
+                except User.DoesNotExist:
+                    user = None
+                    # Créer un nouveau compte
+                    password = User.objects.make_random_password()
+                    user = User.objects.create_user(
+                        username=email,
+                        email=email,
+                        password=password,
+                        first_name=first_name,
+                        last_name=last_name
+                    )
+                    # Créer le profil
+                    UserProfile.objects.create(user=user, role='attendee')
+
+            # Mettre à jour le prénom/nom si différent (au cas où)
+            if user.first_name != first_name or user.last_name != last_name:
+                user.first_name = first_name
+                user.last_name = last_name
+                user.save()
+
+            # user = authenticate(request, username=email, password=password)
+            print(user)
+
+        # if user:
+            login(request, user)
+        # === 2. Connecter l'utilisateur s'il ne l'est pas déjà ===
+        # if not request.user.is_authenticated:
+        #     print(user)
+        #     print(request)
+        #     login(request, user)
+        #     request.session.set_expiry(3600)
+
+
+        # === 3. Récupérer ou créer le profil ===
+        profile, created = UserProfile.objects.get_or_create(
+            user=user,
+            defaults={'role': 'attendee'}
+        )
+        if created:
+            profile.role = 'attendee'
+            profile.save()
+
+        # === 4. Vérifier la carte de paiement (optionnel) ===
+        if not PaymentCard.objects.filter(user=user).exists():
+            messages.warning(request, "⚠️ No payment card on file. Payment simulated for demo.")
+            # Sauvegarder les données de réservation dans la session
+            request.session['pending_reservation'] = {
+                'event_id': event.id,
+                'quantity': qty,
+                'ref_id': ref_id,
+                'first_name': first_name,
+                'last_name': last_name,
+                'email': email,
+            }
+            return render(request, 'redirect_to_payment.html', {
+                'secure_token': profile.secure_token,
+            })
+
+        # === 5. Gérer l'ambassador ===
+        ambassador = None
         if ref_id and ref_id.isdigit():
             ref_id = int(ref_id)
-            # Vérifie que cet utilisateur est bien un ambassador de cet événement
             if event.ambassadors.filter(id=ref_id).exists():
                 ambassador = get_object_or_404(User, id=ref_id)
 
-        qty = int(request.POST.get('quantity', 0))
-        if qty <= 0:
-            messages.error(request, "❌ Enter valid ticket quantity")
-            return redirect('event-detail', event_id=event_id)
-        if qty > event.available_tickets:
-            messages.error(request, f"❌ Only {event.available_tickets} left")
-            return redirect('event-detail', event_id=event_id)
-
+        # === 6. Créer la réservation ===
         total = qty * event.ticket_price
-
         reservation = Reservation.objects.create(
-            user=request.user,
+            user=user,
             event=event,
             quantity=qty,
             total_price=total,
             ambassador=ambassador,
-            signature=f"{request.user.id}-{timezone.now().timestamp()}"
+            signature=f"{user.id}-{timezone.now().timestamp()}"
         )
-        request.session['reservation_id'] = reservation.id
 
+        # === 7. Mettre à jour les stocks et stats ===
         event.available_tickets -= qty
         event.save()
-        profile.total_tickets_reserved += reservation.quantity
+
+        profile.total_tickets_reserved += qty
         profile.save()
 
         request.session['reservation_id'] = reservation.id
-        request.session['booking_message'] = f"🎉 You booked {reservation.quantity} for \"{event.title}\"!"
+
+        # === 8. Rediriger vers succès ===
+        request.session['booking_message'] = f"🎉 You booked {qty} ticket(s) for \"{event.title}\"!"
         return redirect('booking-success')
 
-    return redirect('event-detail', event_id=event_id)
+    # Si ce n'est pas POST, rediriger vers la page publique
+    return redirect('event-public-detail', event_id=event_id)
 
 
 @login_required

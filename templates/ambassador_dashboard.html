@@ -87,6 +87,14 @@
     {% for event in events %}
     <div class="col position-relative">
       <div class="card h-100 shadow border-0 rounded-4 overflow-hidden">
+
+        {% if event.cover_image %}
+    <img src="{{ event.cover_image.url }}" class="card-img-top" style="height: 150px; object-fit: cover;" alt="{{ event.title }}">
+  {% else %}
+    <div class="bg-light text-center py-5">
+      <span class="text-muted">No cover</span>
+    </div>
+  {% endif %}
     
         <div class="position-absolute top-0 end-0 m-2">
           {% if event.available_tickets > 0 %}

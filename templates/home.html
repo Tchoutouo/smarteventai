@@ -26,7 +26,7 @@
 
           {% if request.user.is_authenticated and request.user.userprofile.role == 'attendee' %}
             {% if event.available_tickets > 0 %}
-              <form method="post" action="{% url 'book-ticket' event.id request.user.userprofile.secure_token %}">
+              <form method="post" action="{% url 'book-ticket' event.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="event_title" value="{{ event.title }}">
                 <input type="hidden" name="price" value="{{ event.ticket_price }}">

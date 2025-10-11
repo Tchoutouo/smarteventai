@@ -1,5 +1,10 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -100,8 +105,12 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
 
 IP_ADDRESS = os.getenv('IP_ADDRESS', '192.168.32.77')
+

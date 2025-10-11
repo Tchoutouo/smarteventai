@@ -31,6 +31,10 @@
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'organizer-dashboard' secure_token=request.user.userprofile.secure_token %}">Organizer Dashboard</a>
               </li>
+            {% elif request.user.userprofile.role == 'ambassador' %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'ambassador-dashboard' secure_token=request.user.userprofile.secure_token %}">Ambassador Dashboard</a>
+              </li>
             {% elif request.user.is_superuser %}
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'supervisor-panel' %}">Supervisor Panel</a>
@@ -55,7 +59,6 @@
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="{% url 'profile' %}">View Profile</a></li>
                 <li><a class="dropdown-item" href="{% url 'edit-profile' %}">Edit Profile</a></li>
-                <li><a class="dropdown-item" href="{% url 'complaint-list' %}">Complaints</a></li>
 
                 {% if request.user.userprofile.role == 'attendee' %}
                   <li>

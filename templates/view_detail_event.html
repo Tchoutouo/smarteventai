@@ -5,6 +5,15 @@
 <div class="container my-5">
   <h2>{{ event.title }}</h2>
 
+  <div class="row g-4">
+  <div class="col-lg-8">
+    {% if event.cover_image %}
+      <img src="{{ event.cover_image.url }}" class="img-fluid rounded-4 mb-4" alt="{{ event.title }}">
+    {% endif %}
+    <!-- ... description ... -->
+  </div>
+</div>
+
   <!-- Infos communes -->
   <div class="card mb-4">
     <div class="card-body">

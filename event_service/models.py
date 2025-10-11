@@ -16,6 +16,12 @@ class Event(models.Model):
     is_deleted = models.BooleanField(default=False)
     ambassadors = models.ManyToManyField(User, blank=True, related_name='ambassador_events')
 
+    cover_image = models.ImageField(
+        upload_to='event_covers/',
+        blank=True,
+        null=True,
+        help_text="Image de couverture de l'événement (1200x630 recommandé)"
+    )
     def __str__(self):
         return self.title
 
@@ -29,7 +35,7 @@ class Reservation(models.Model):
     secret_key = models.CharField(max_length=100, unique=True, default='', editable=False)
     ambassador = models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
         null=True,
         blank=True,
         related_name='ambassador_reservations'

@@ -45,6 +45,7 @@ def payment_dashboard_view(request, secure_token):
 
 @login_required
 def add_payment_card_view(request, secure_token):
+    print("add_payment_card_view")
     profile = UserProfile.objects.filter(secure_token=secure_token).first()
     if not profile or profile.user != request.user or profile.role != 'attendee':
         return render(request, 'access_denied.html')
@@ -52,7 +53,12 @@ def add_payment_card_view(request, secure_token):
     if request.method == 'POST':
         if PaymentCard.objects.filter(user=request.user).exists():
             messages.error(request, "Card already added.", extra_tags='payment')
-            return redirect('payment-dashboard', secure_token=secure_token)
+            # === Vérifier s'il y a une réservation en attente ===
+            if 'pending_reservation' in request.session:
+                print("Je suis ici")
+                return redirect('complete-pending-reservation')
+            else:
+                return redirect('payment-dashboard', secure_token=secure_token)
 
         PaymentCard.objects.create(
             user=request.user,
@@ -63,7 +69,17 @@ def add_payment_card_view(request, secure_token):
             expiry_year=request.POST['expiry_year']
         )
         messages.success(request, "✅ Card added successfully.", extra_tags='payment swal')
-        return redirect('payment-dashboard', secure_token=secure_token)
+        # === Vérifier s'il y a une réservation en attente ===
+        print("pending_reservation")
+
+        if 'pending_reservation' in request.session:
+            print("ertvhyer irfnttyieurohuebtr")
+            return redirect('complete-pending-reservation')
+        else:
+            print("frmute troimenit")
+            return redirect('payment-dashboard', secure_token=secure_token)
+
+
 
 
 @login_required
