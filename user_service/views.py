@@ -5,6 +5,9 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from user_service.models import UserProfile
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
 
 # Check strong password
 def is_strong_password(password):
@@ -166,3 +169,12 @@ def edit_profile_view(request):
         return redirect('profile')
 
     return render(request, 'edit_profile.html', {'user': request.user})
+
+
+@require_POST
+@login_required
+def toggle_email_consent(request):
+    profile = request.user.userprofile
+    profile.email_consent = not profile.email_consent
+    profile.save()
+    return redirect('profile')
