@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'complaint_service',
     'payment_service',
     'rest_framework',
+    'ai_service',
 ]
 
 

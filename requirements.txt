@@ -165,3 +165,5 @@ whisper==1.1.10
 wrapt==1.17.2
 xhtml2pdf==0.2.17
 zipp==3.21.0
+transformers==4.43.3
+sentence-transformers==2.7.0
