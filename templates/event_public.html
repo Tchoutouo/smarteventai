@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <!-- En-tête de l'événement -->
+  <div class="text-center mb-5">
+    <h1 class="display-5 fw-bold text-primary">{{ event.title }}</h1>
+    {% if event.available_tickets > 0 %}
+      <span class="badge bg-success fs-6 mt-2">🎟 {{ event.available_tickets }} places disponibles</span>
+    {% else %}
+      <span class="badge bg-danger fs-6 mt-2">❌ Événement complet</span>
+    {% endif %}
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="row g-4">
+    <!-- Colonne gauche : infos & description -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+          <h5 class="fw-bold mb-4">Détails de l'événement</h5>
+
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>📅 Date</span>
+              <strong>{{ event.date }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>📍 Lieu</span>
+              <strong>{{ event.location }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>💵 Prix du billet</span>
+              <strong class="text-success">${{ event.ticket_price }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>🎟 Places restantes</span>
+              <strong>
+                {% if event.available_tickets > 0 %}
+                  {{ event.available_tickets }}
+                {% else %}
+                  0
+                {% endif %}
+              </strong>
+            </li>
+          </ul>
+
+          <div class="mt-4">
+            <h6 class="fw-bold">Description</h6>
+            <p class="text-muted">{{ event.description|linebreaks }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne droite : actions -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 rounded-4 h-100">
+        <div class="card-body d-flex flex-column">
+          <h5 class="fw-bold mb-4">Réserver votre place</h5>
+
+          {% if event.available_tickets > 0 %}
+            <a href="{% url 'event-detail' event.id %}?ref={{ request.GET.ref|urlencode }}" class="btn btn-success btn-lg w-100 mb-3 rounded-pill shadow-sm">
+              🎟 Réserver maintenant
+            </a>
+            <p class="text-muted small text-center">
+              Sécurisé • Paiement immédiat • Confirmation par email
+            </p>
+          {% else %}
+            <button class="btn btn-outline-secondary btn-lg w-100 mb-3 rounded-pill" disabled>
+              ❌ Complet
+            </button>
+            <p class="text-muted small text-center">
+              Rejoignez la liste d'attente bientôt disponible.
+            </p>
+          {% endif %}
+
+          <!-- Partage social (optionnel) -->
+          <div class="mt-auto pt-3 border-top">
+            <p class="small text-muted mb-2">Partager cet événement :</p>
+            <div class="d-flex gap-2 justify-content-center">
+              <a href="https://twitter.com/intent/tweet?text=Venez%20à%20{{ event.title|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-sm btn-outline-primary">🐦 Twitter</a>
+              <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-sm btn-outline-primary">📘 Facebook</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section "Événements similaires" (optionnel) -->
+  <!--
+  <div class="mt-5">
+    <h4 class="mb-3">Événements similaires</h4>
+    <div class="row">
+      {% for similar in similar_events %}
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h6>{{ similar.title }}</h6>
+              <p class="text-muted small">{{ similar.date }} • ${{ similar.ticket_price }}</p>
+              <a href="{% url 'event-public-detail' similar.id %}" class="btn btn-outline-primary btn-sm">Voir</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  -->
+</div>
+
+<style>
+  .list-group-item {
+    border-left: 0;
+    border-right: 0;
+  }
+  .card {
+    transition: transform 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+  }
+</style>
+{% endblock %}

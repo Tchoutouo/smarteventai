@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ event.title }} - Organizer{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary">{{ event.title }}</h2>
+    <a href="{% url 'organizer-dashboard' secure_token %}" class="btn btn-outline-secondary rounded-pill">← Back to Dashboard</a>
+  </div>
+
+  <!-- Statut de l'événement -->
+  <div class="alert
+    {% if event.available_tickets > 0 %}bg-success bg-opacity-10 border-success{% else %}bg-danger bg-opacity-10 border-danger{% endif %}
+    border-start border-5 rounded-4 shadow-sm p-3 mb-4">
+    <strong>Status:</strong>
+    {% if event.available_tickets > 0 %}
+      <span class="text-success">✅ Active ({{ event.available_tickets }} tickets left)</span>
+    {% else %}
+      <span class="text-danger">❌ Sold Out</span>
+    {% endif %}
+  </div>
+
+  <!-- Infos principales -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Event Details</h5>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between">
+              <span>📅 Date:</span> <strong>{{ event.date }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>📍 Location:</span> <strong>{{ event.location }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>🎟 Total Tickets:</span> <strong>{{ event.total_tickets }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>🎫 Available:</span> <strong>{{ event.available_tickets }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>💵 Price:</span> <strong>${{ event.ticket_price }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>💰 Revenue:</span> <strong>${{ event.event_revenue|floatformat:2 }}</strong>
+            </li>
+            <li class="list-group-item">
+              <span>📝 Description:</span><br>
+              <small class="text-muted">{{ event.description }}</small>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 rounded-4 h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <h5 class="fw-bold mb-3">Actions</h5>
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#listAmbassadorModal">
+              👥 Ambassadeurs actuels ({{ event.ambassadors.count }})
+            </button>
+            <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addAmbassadorModal">
+              ➕ Ajouter un ambassadeur
+            </button>
+            <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editModal">
+              ✏️ Modifier l'événement
+            </button>
+            <button class="btn btn-outline-danger rounded-pill delete-btn"
+                    data-id="{{ event.id }}"
+                    data-title="{{ event.title }}">
+              🗑️ Supprimer l'événement
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- === MODALS === -->
+
+<!-- Modal: Liste des ambassadeurs actuels -->
+<div class="modal fade" id="listAmbassadorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ambassadeurs de « {{ event.title }} »</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        {% if event.ambassadors.exists %}
+          <ul class="list-group">
+            {% for ambassador in event.ambassadors.all %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ ambassador.get_full_name|default:ambassador.username }}</strong>
+                  {% if ambassador.email %}<br><small class="text-muted">{{ ambassador.email }}</small>{% endif %}
+                </div>
+                <form method="post" action="{% url 'remove-ambassador-from-event' secure_token event.id ambassador.id %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger"
+                          onclick="return confirm('Retirer {{ ambassador.get_full_name|default:ambassador.username }} ?')">
+                    Retirer
+                  </button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">Aucun ambassadeur assigné.</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Ajouter un ambassadeur -->
+<div class="modal fade" id="addAmbassadorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ajouter un ambassadeur</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        {% if eligible_ambassadors %}
+          <div class="row g-2">
+            {% for user in eligible_ambassadors %}
+              <div class="col-12">
+                <a href="{% url 'add_ambassador_to_event' secure_token event.id user.id %}"
+                   class="btn btn-outline-primary w-100 text-start"
+                   onclick="return confirm('Ajouter {{ user.get_full_name|default:user.username }} comme ambassadeur ?')">
+                  {{ user.get_full_name|default:user.username }}
+                  {% if user.email %}<small class="text-muted"> — {{ user.email }}</small>{% endif %}
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">Aucun ambassadeur éligible disponible.</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Éditer l'événement -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'edit_event' secure_token event.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Modifier : {{ event.title }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Title</label><input type="text" name="title" class="form-control" value="{{ event.title }}" required></div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="3" required>{{ event.description }}</textarea></div>
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-control" value="{{ event.date|date:'Y-m-d' }}" min="{{ today }}" max="{{ max_date }}" required>
+          </div>
+          <div class="mb-3"><label class="form-label">Location</label><input type="text" name="location" class="form-control" value="{{ event.location }}" required></div>
+          <div class="mb-3"><label class="form-label">Ticket Price ($)</label><input type="number" name="ticket_price" min="0" step="0.01" class="form-control" value="{{ event.ticket_price }}" required></div>
+          <div class="mb-3"><label class="form-label">Available Tickets</label><input type="number" name="available_tickets" min="0" class="form-control" value="{{ event.available_tickets }}" required></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- === SCRIPTS === -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  {% if messages %}
+    {% for message in messages %}
+      {% if 'swal' in message.tags %}
+        Swal.fire({
+          icon: 'success',
+          title: '{{ message|escapejs }}',
+          showConfirmButton: false,
+          timer: 2000
+        });
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  // Suppression d'événement
+  document.querySelector('.delete-btn')?.addEventListener('click', () => {
+    const eventId = "{{ event.id }}";
+    const title = "{{ event.title }}";
+
+    Swal.fire({
+      title: `Supprimer « ${title} » ?`,
+      text: "Cette action est irréversible.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer !',
+      cancelButtonText: 'Annuler'
+    }).then(result => {
+      if (result.isConfirmed) {
+        fetch(`{% url 'delete_event' secure_token 0 %}`.replace('/0/', `/${eventId}/`), {
+          method: 'POST',
+          headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        }).then(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Événement supprimé !',
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.href = "{% url 'organizer-dashboard' secure_token %}";
+          });
+        });
+      }
+    });
+  });
+</script>
+
+<style>
+  .list-group-item {
+    border-left: none;
+    border-right: none;
+  }
+  .btn-outline-primary:hover {
+    background-color: #e9ecef;
+  }
+</style>
+
+{% endblock %}

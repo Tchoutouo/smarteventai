@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2>{{ event.title }}</h2>
+
+  <!-- Infos communes -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <p><strong>Date:</strong> {{ event.date }}</p>
+      <p><strong>Lieu:</strong> {{ event.location }}</p>
+      <p><strong>Prix:</strong> ${{ event.ticket_price }}</p>
+      <p>{{ event.description }}</p>
+    </div>
+  </div>
+
+  <!-- Actions selon le rôle -->
+  {% if is_organizer %}
+    <div class="alert alert-info">
+      👨‍💼 Vous êtes l'organisateur de cet événement.
+    </div>
+
+    <!-- Boutons organisateur -->
+    <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal">✏️ Modifier</button>
+      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#listAmbassadorModal">👥 Ambassadeurs ({{ event.ambassadors.count }})</button>
+      <button class="btn btn-danger delete-btn" data-id="{{ event.id }}">🗑️ Supprimer</button>
+    </div>
+
+
+
+  {% elif is_ambassador %}
+    <div class="alert alert-success">
+      🤝 Vous êtes ambassadeur pour cet événement.
+    </div>
+
+    <!-- Stats ambassadeur (optionnel) -->
+    <div class="card">
+      <div class="card-body">
+        <h5>Vos performances</h5>
+        <p>Réservations générées : <strong>{{ ambassador_reservations }}</strong></p>
+        <p>Nombre de places : <strong>{{ total_places }}</strong></p>
+        <p>Revenu attribué : <strong>${{ ambassador_revenue|floatformat:2 }}</strong></p>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+    <div class="card-header bg-success bg-opacity-10">
+      <h5 class="mb-0">🔗 Votre lien de partage</h5>
+    </div>
+    <div class="card-body text-center">
+      <p class="text-muted mb-3">Partagez ce QR code ou ce lien pour générer des réservations :</p>
+
+      <!-- QR Code -->
+      <div class="mb-3">
+        <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code" class="img-fluid" style="max-width: 200px;">
+      </div>
+
+      <!-- Lien cliquable -->
+      <div class="input-group mb-2">
+        <input type="text" class="form-control form-control-sm" value="{{ shareable_url }}" readonly>
+        <button class="btn btn-outline-secondary btn-sm" type="button" onclick="copyToClipboard()">📋 Copier</button>
+      </div>
+
+      <small class="text-muted">Les réservations faites via ce lien vous seront attribuées.</small>
+    </div>
+  </div>
+
+  <script>
+    function copyToClipboard() {
+      const url = "{{ shareable_url }}";
+      navigator.clipboard.writeText(url).then(() => {
+        Swal.fire({ icon: 'success', title: 'Lien copié !', timer: 1000, showConfirmButton: false });
+      });
+    }
+  </script>
+  {% endif %}
+
+  <!-- === Modals (organisateur uniquement) === -->
+  {% if is_organizer %}
+    <!-- Modal: Liste des ambassadeurs -->
+    <div class="modal fade" id="listAmbassadorModal">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Liste des ambassadeurs</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        {% if ambassadors %}
+          <div class="row g-3">
+            {% for user in ambassadors %}
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow border-0 rounded-4">
+                  <div class="card-body d-flex flex-column justify-content-between">
+                    <div class="d-grid gap-2">
+                      <button class="btn btn-outline-primary rounded-pill text-start">
+                        {{ user.userprofile.full_name }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">Aucun ambassadeur éligible trouvé.</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+    </div>
+
+    <!-- Modal: Ajout -->
+    <div class="modal fade" id="addAmbassadorModal">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Liste des ambassadeurs potentiels</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        {% if eligible_ambassadors %}
+          <div class="row g-3">
+            {% for user in eligible_ambassadors %}
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow border-0 rounded-4">
+                  <div class="card-body d-flex flex-column justify-content-between">
+                    <div class="d-grid gap-2">
+                      <a href="{% url 'add_ambassador_to_event' secure_token event.id user.id %}"
+                         class="btn btn-outline-primary rounded-pill text-start"
+                         onclick="return confirm('Ajouter {{ user.userprofile.full_name }} comme ambassadeur ?')">
+                        {{ user.userprofile.full_name }}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">Aucun ambassadeur éligible trouvé.</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+    </div>
+
+    <!-- Modal: Édition -->
+    <div class="modal fade" id="editModal">
+      <!-- ... -->
+    </div>
+  {% endif %}
+</div>
+
+<!-- Scripts (SweetAlert, suppression, etc.) -->
+{% if is_organizer %}
+  <script>
+    // Script de suppression ici
+  </script>
+{% endif %}
+{% endblock %}
