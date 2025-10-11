@@ -24,10 +24,44 @@
     <!-- Boutons organisateur -->
     <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal">✏️ Modifier</button>
-      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#listAmbassadorModal">👥 Ambassadeurs ({{ event.ambassadors.count }})</button>
+      <!--<button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#listAmbassadorModal">👥 Ambassadeurs ({{ event.ambassadors.count }})</button> -->
+      <!-- Ajouter un ambassadeur -->
+      <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addAmbassadorModal">➕ Ajouter un ambassadeur</button>
       <button class="btn btn-danger delete-btn" data-id="{{ event.id }}">🗑️ Supprimer</button>
     </div>
-
+    <div class="card">
+      <div class="card-header bg-primary bg-opacity-10">
+        <h5 class="mb-0">📊 Statistiques des ambassadeurs</h5>
+      </div>
+      <div class="card-body">
+        <p>Total des réservations : <strong>{{ total_reservations }}</strong></p>
+        <p>Total des revenus : <strong>${{ total_revenue|floatformat:2 }}</strong></p>
+        <table class="table table-hover">
+            <thead class="table table-primary">
+              <tr>
+                <th>👥 Ambassadeurs ({{ event.ambassadors.count }})</th>
+                <th>Réservations</th>
+                <th>Places</th>
+                <th>Revenu</th>
+              </tr>
+            </thead>
+          <tbody>
+            {% if ambassadors %}
+              {% for user in ambassadors %}
+                <tr>
+                  <td>{{ user.user.userprofile.full_name }}</td>
+                  <td>{{ user.reservations_count }}</td>
+                  <td>{{ user.places }}</td>
+                  <td>${{ user.revenue|floatformat:2 }}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <p class="text-muted">Aucun ambassadeur éligible trouvé.</p>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
 
 
   {% elif is_ambassador %}
@@ -78,41 +112,41 @@
   {% endif %}
 
   <!-- === Modals (organisateur uniquement) === -->
-  {% if is_organizer %}
-    <!-- Modal: Liste des ambassadeurs -->
-    <div class="modal fade" id="listAmbassadorModal">
-      <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Liste des ambassadeurs</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
+{% if is_organizer %}
+  <!-- Modal: Liste des ambassadeurs -->
+  <div class="modal fade" id="listAmbassadorModal">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Liste des ambassadeurs</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
 
-        {% if ambassadors %}
-          <div class="row g-3">
-            {% for user in ambassadors %}
-              <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow border-0 rounded-4">
-                  <div class="card-body d-flex flex-column justify-content-between">
-                    <div class="d-grid gap-2">
-                      <button class="btn btn-outline-primary rounded-pill text-start">
-                        {{ user.userprofile.full_name }}
-                      </button>
-                    </div>
+      {% if ambassadors %}
+        <div class="row g-3">
+          {% for user in ambassadors %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 shadow border-0 rounded-4">
+                <div class="card-body d-flex flex-column justify-content-between">
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary rounded-pill text-start">
+                      {{ user.userprofile.full_name }}
+                    </button>
                   </div>
                 </div>
               </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <p class="text-muted">Aucun ambassadeur éligible trouvé.</p>
-        {% endif %}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-      </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">Aucun ambassadeur éligible trouvé.</p>
+      {% endif %}
     </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+    </div>
+  </div>
   </div>
     </div>
 

@@ -297,13 +297,38 @@ def event_secure_detail(request, secure_token, event_id):
             id__in=ambassadors.values_list('id', flat=True)
         )
 
+        # 🔥 Calcul des statistiques par ambassadeur
+        ambassador_stats = []
+        for ambassador in ambassadors:
+            ambassador_reservations = Reservation.objects.filter(
+                event=event,
+                ambassador=ambassador
+            )
+            count = ambassador_reservations.count()
+            total_places = ambassador_reservations.aggregate(total=Sum('quantity'))['total'] or 0
+            total_revenue = ambassador_reservations.aggregate(total=Sum('total_price'))['total'] or 0
 
+            ambassador_stats.append({
+                'user': ambassador,
+                'reservations_count': count,
+                'places': total_places,
+                'revenue': total_revenue,
+            })
+
+        ambassador_stats.sort(key=lambda x: x['places'], reverse=True)
+        # Calculs globaux
+        total_reservations = Reservation.objects.filter(event=event).count()
+        total_revenue = Reservation.objects.filter(event=event).aggregate(
+            total=Sum('total_price')
+        )['total'] or 0
 
         context.update({
-            'ambassadors': ambassadors,
+            'ambassadors': ambassador_stats,  # ✅ maintenant avec stats
             'eligible_ambassadors': eligible_ambassadors,
             'today': date.today().isoformat(),
             'max_date': (date.today() + timedelta(days=3 * 365)).isoformat(),
+            'total_reservations': total_reservations,
+            'total_revenue': total_revenue,
         })
 
     if is_ambassador:
