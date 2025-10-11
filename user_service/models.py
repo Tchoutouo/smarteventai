@@ -15,7 +15,7 @@ class UserProfile(models.Model):
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    email_consent = models.BooleanField(default=False, help_text="Accepte de recevoir des recommandations par email")
+    email_consent = models.BooleanField(default=False, null=True, blank=True, help_text="Accepte de recevoir des recommandations par email")
     secure_token = models.CharField(
         max_length=64,
         unique=True,
