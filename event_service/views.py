@@ -21,7 +21,3 @@ class EventDetailUpdateView(generics.RetrieveUpdateAPIView):
 
 
 
-
-
-
-
