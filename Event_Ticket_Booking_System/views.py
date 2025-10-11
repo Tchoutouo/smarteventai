@@ -308,8 +308,8 @@ def event_secure_detail(request, secure_token, event_id):
 
     if is_ambassador:
         # URL publique avec tracking
-        local_ip = "192.168.32.128"  # ← à remplacer par ton IP !
-        public_url = f"http://{local_ip}:8001/event/{event.id}/?ref={user.id}"
+        local_ip = settings.IP_ADDRESS  # ← à remplacer par ton IP !
+        public_url = f"http://{local_ip}:8000/event/{event.id}/?ref={user.id}"
 
         # public_url = request.build_absolute_uri(
         #     f"/event/{event.id}/?ref={user.id}"

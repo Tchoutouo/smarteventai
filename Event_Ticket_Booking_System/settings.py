@@ -103,3 +103,5 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/login/'
+
+IP_ADDRESS = os.getenv('IP_ADDRESS', '192.168.32.77')
