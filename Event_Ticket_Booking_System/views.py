@@ -29,7 +29,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as canvas_module
-
+from ai_service.recommender import get_recommendations_for_event
+from ai_service.utils import update_event_embedding
 
 
 
@@ -247,10 +248,27 @@ def event_public_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     ref_id = request.GET.get('ref')
     print(ref_id)
-    return render(request, 'event_public.html',
-                  {'event': event, "ref_ambassador": ref_id}
-                  )
 
+    return render(request, 'event_public.html',
+                {'event': event, "ref_ambassador": ref_id}
+
+                )
+
+#def event_public_detail(request, event_id):
+#    event = get_object_or_404(Event, id=event_id)
+#    ref_id = request.GET.get('ref')
+#
+#    # Générer l’embedding si absent (en dev)
+#    if not hasattr(event, 'embedding'):
+#        update_event_embedding(event)
+#
+#    recommendations = get_recommendations_for_event(event, top_k=4)
+#
+#    return render(request, 'event_public.html', {
+#        'event': event,
+#        'ref_ambassador': ref_id,
+#        'recommendations': recommendations
+#    })
 
 @login_required
 def event_secure_detail(request, secure_token, event_id):
@@ -549,8 +567,21 @@ def booking_success_view(request):
     if not reservation_id:
         return redirect('home')
     reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
+    event = reservation.event
+    #event_id = event.id
+    ref_id = request.GET.get('ref')
+        # Générer l’embedding si absent (en dev)
+    if not hasattr(event, 'embedding'):
+        update_event_embedding(event)
+
+    recommendations = get_recommendations_for_event(event, top_k=4)
+
+    print(event)
     return render(request, 'booking_success.html', {
-        'reservation': reservation
+        'reservation': reservation,
+        'event': event,
+        'ref_ambassador': ref_id,
+        'recommendations': recommendations
     })
 
 
