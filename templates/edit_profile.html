@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Modifier le profil{% endblock %}
 
 {% block content %}
 <div class="container col-md-6 mt-4">
-  <h2 class="text-center text-primary mb-4">Edit Profile</h2>
+  <h2 class="text-center text-primary mb-4">Modifier le profil</h2>
 
   {% if messages %}
     {% for message in messages %}
@@ -16,38 +16,48 @@
   <form method="POST" action="{% url 'edit-profile' %}">
     {% csrf_token %}
     <div class="mb-3">
-      <label class="form-label">Full Name</label>
+      <label class="form-label">Nom Complet</label>
       <input type="text" name="full_name" class="form-control" required value="{{ user.first_name }}">
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Current Password</label>
+      <label class="form-label">Mot de Passe Actuel</label>
       <input type="password" name="current_password" class="form-control" required>
     </div>
 
     <div class="mb-3">
-      <label class="form-label">New Password</label>
+      <label class="form-label">Nouveau Mot de Passe</label>
       <input type="password" id="password" name="password" class="form-control">
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Confirm New Password</label>
+      <label class="form-label">Confirmer le Nouveau Mot de Passe</label>
       <input type="password" id="confirm_password" name="confirm_password" class="form-control">
     </div>
 
     <!-- Password Strength Checker -->
     <div class="mb-3">
-      <label class="form-label">Password must contain:</label>
+      <label class="form-label">Le mot de passe doit contenir :</label>
       <ul class="list-unstyled" id="password-criteria">
-        <li id="length" class="text-danger">❌ At least 8 characters</li>
-        <li id="lower" class="text-danger">❌ One lowercase letter</li>
-        <li id="upper" class="text-danger">❌ One uppercase letter</li>
-        <li id="number" class="text-danger">❌ One number</li>
-        <li id="symbol" class="text-danger">❌ One symbol</li>
+        <li id="length" class="text-danger">❌ Au moins 8 caractères</li>
+        <li id="lower" class="text-danger">❌ Une lettre minuscule</li>
+        <li id="upper" class="text-danger">❌ Une lettre majuscule</li>
+        <li id="number" class="text-danger">❌ Un chiffre</li>
+        <li id="symbol" class="text-danger">❌ Un symbole</li>
       </ul>
     </div>
-
-    <button type="submit" class="btn btn-success w-100">Update Profile</button>
+    <form method="post" action="{% url 'toggle_email_consent' %}">
+      {% csrf_token %}
+      <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="emailConsent"
+                {% if user.userprofile.email_consent %}checked{% endif %}
+                onchange="this.form.submit()">
+          <label class="form-check-label" for="emailConsent">
+              Recevoir des recommandations d’événements par email
+          </label>
+      </div>
+    </form>
+    <button type="submit" class="btn btn-success w-100">Mettre à jour le profil</button>
   </form>
 </div>
 

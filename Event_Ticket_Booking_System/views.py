@@ -168,7 +168,7 @@ def ambassador_dashboard_view(request, secure_token):
     name = request.user.first_name or request.user.username
     current_hour = datetime.now().hour
     is_morning = current_hour < 12
-    greeting_message = f"Good Morning, {name}!" if is_morning else f"Good Evening, {name}!"
+    greeting_message = f"Bonjour, {name}!" if is_morning else f"Bonsoir, {name}!"
 
     context = {
         'events': events,
@@ -198,7 +198,7 @@ def delete_event_view(request, secure_token, event_id):
 
     if request.method == "POST":
         event.delete()
-        messages.success(request, "✅ Event deleted successfully!", extra_tags="swal")
+        messages.success(request, "✅ Événement supprimé avec succès !", extra_tags="swal")
         return redirect('organizer-dashboard', secure_token=secure_token)
 
     return HttpResponseForbidden("Invalid request.")
@@ -226,11 +226,11 @@ def edit_event_view(request, secure_token, event_id):
         try:
             event_date = date.fromisoformat(date_str)
         except ValueError:
-            messages.error(request, "Invalid date format.")
+            messages.error(request, "Format de date invalide.")
             return redirect('organizer-dashboard', secure_token=secure_token)
 
         if not (today <= event_date <= max_date):
-            messages.error(request, "Date must be between today and 3 years from now.")
+            messages.error(request, "La date doit être comprise entre aujourd'hui et 3 ans à partir de maintenant.")
             return redirect('organizer-dashboard', secure_token=secure_token)
 
         event.title = title
@@ -246,10 +246,10 @@ def edit_event_view(request, secure_token, event_id):
 
         event.save()
 
-        messages.success(request, "✅ Event updated successfully!", extra_tags="swal")
+        messages.success(request, "✅ Événement mis à jour avec succès !", extra_tags="swal")
         return redirect('organizer-dashboard', secure_token=secure_token)
 
-    return HttpResponseForbidden("Invalid method.")
+    return HttpResponseForbidden("Méthode invalide.")
 
 
 def event_public_detail(request, event_id):
@@ -422,12 +422,12 @@ def add_ambassador_to_event(request, secure_token, event_id, user_id):
     # Vérifie que cet utilisateur est bien un ambassador (optionnel mais recommandé)
     ambassador_profile = get_object_or_404(UserProfile, user=ambassador_user)
     if ambassador_profile.role != "ambassador":
-        messages.error(request, "This user is not an ambassador.")
+        messages.error(request, "Cet utilisateur n'est pas un ambassadeur.")
         return redirect('organizer-dashboard', secure_token=secure_token)
 
     # Ajoute (ManyToMany ignore les doublons)
     event.ambassadors.add(ambassador_user)
-    messages.success(request, f"{ambassador_user.get_full_name() or ambassador_user.username} added as ambassador!")
+    messages.success(request, f"{ambassador_user.get_full_name() or ambassador_user.username} ajouté en tant qu'ambassadeur !")
     return redirect('organizer-dashboard', secure_token=secure_token)
 
 
@@ -451,10 +451,10 @@ def event_create_view(request, secure_token):
             today = date.today()
             max_date = today + timedelta(days=3*365)
             if not (today <= event_date <= max_date):
-                messages.error(request, "Invalid event date.")
+                messages.error(request, "Date d'événement non valide.")
                 return redirect('organizer-dashboard', secure_token=secure_token)
         except ValueError:
-            messages.error(request, "Invalid date format.")
+            messages.error(request, "Format de date invalide.")
             return redirect('organizer-dashboard', secure_token=secure_token)
 
         event = Event.objects.create(
@@ -472,7 +472,7 @@ def event_create_view(request, secure_token):
             event.cover_image = request.FILES['cover_image']
 
         event.save()
-        messages.success(request, "✅ Event added successfully!", extra_tags="swal")
+        messages.success(request, "✅ Événement ajouté avec succès !", extra_tags="swal")
 
     return redirect('organizer-dashboard', secure_token=secure_token)
 
@@ -493,10 +493,10 @@ def complaint_form_view(request):
         form = ComplaintForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, "✅ Complaint submitted successfully.")
+            messages.success(request, "✅ Réclamation soumise avec succès.")
             return redirect('complaint-form')
         else:
-            messages.error(request, "⚠️ Please correct the errors below.")
+            messages.error(request, "⚠️ Veuillez corriger les erreurs ci-dessous.")
     else:
         form = ComplaintForm(user=request.user)
 
@@ -523,7 +523,7 @@ def search_view(request):
 def complete_pending_reservation(request):
     print("complete_pending_reservation")
     if 'pending_reservation' not in request.session:
-        messages.error(request, "No pending reservation found.")
+        messages.error(request, "Aucune réservation en attente trouvée.")
         return redirect('organizer-dashboard')  # ou autre page
 
     data = request.session['pending_reservation']
@@ -532,14 +532,14 @@ def complete_pending_reservation(request):
 
     # Vérifier que la carte existe maintenant
     if not PaymentCard.objects.filter(user=request.user).exists():
-        messages.error(request, "You must add a payment card first.")
+        messages.error(request, "Vous devez d'abord ajouter une carte de paiement.")
         return redirect('add-payment-card', secure_token=request.user.userprofile.secure_token)
 
     # === Reprendre la réservation ===
     qty = data['quantity']
     if qty > event.available_tickets:
         del request.session['pending_reservation']
-        messages.error(request, f"Only {event.available_tickets} tickets left.")
+        messages.error(request, f"Il ne reste que {event.available_tickets} billets.")
         return redirect('event-public-detail', event_id=event.id)
 
     # Ambassador
@@ -573,7 +573,7 @@ def complete_pending_reservation(request):
 
     request.session['reservation_id'] = reservation.id
 
-    request.session['booking_message'] = f"🎉 Reservation completed! {qty} ticket(s) for \"{event.title}\"."
+    request.session['booking_message'] = f"🎉 Réservation terminée ! {qty} billet(s) pour \"{event.title}\"."
     return redirect('booking-success')
 
 
@@ -648,7 +648,7 @@ def book_ticket_view(request, event_id):
     event = get_object_or_404(Event, id=event_id, is_deleted=False)
 
     if event.available_tickets <= 0:
-        messages.error(request, "❌ This event is sold out.")
+        messages.error(request, "❌ Cet événement est complet.")
         return redirect('event-public-detail', event_id=event.id)
 
     if request.method == 'POST':
@@ -661,16 +661,16 @@ def book_ticket_view(request, event_id):
 
         # Validation basique
         if not (first_name and last_name and email):
-            messages.error(request, "❌ First name, last name, and email are required.")
+            messages.error(request, "❌ Le prénom, le nom et l'email sont requis.")
             return redirect('event-public-detail', event_id=event.id)
 
         if not qty.isdigit() or int(qty) <= 0:
-            messages.error(request, "❌ Please enter a valid ticket quantity.")
+            messages.error(request, "❌ Veuillez entrer une quantité de billets valide.")
             return redirect('event-public-detail', event_id=event.id)
 
         qty = int(qty)
         if qty > event.available_tickets:
-            messages.error(request, f"❌ Only {event.available_tickets} tickets available.")
+            messages.error(request, f"❌ Il ne reste que {event.available_tickets} billets.")
             return redirect('event-public-detail', event_id=event.id)
 
         # === 1. Gérer l'utilisateur (existant ou nouveau) ===
@@ -731,7 +731,7 @@ def book_ticket_view(request, event_id):
 
         # === 4. Vérifier la carte de paiement (optionnel) ===
         if not PaymentCard.objects.filter(user=user).exists():
-            messages.warning(request, "⚠️ No payment card on file. Payment simulated for demo.")
+            messages.warning(request, "⚠️ Aucune carte de paiement enregistrée. Paiement simulé pour la démo.")
             # Sauvegarder les données de réservation dans la session
             request.session['pending_reservation'] = {
                 'event_id': event.id,
@@ -773,7 +773,7 @@ def book_ticket_view(request, event_id):
         request.session['reservation_id'] = reservation.id
 
         # === 8. Rediriger vers succès ===
-        request.session['booking_message'] = f"🎉 You booked {qty} ticket(s) for \"{event.title}\"!"
+        request.session['booking_message'] = f"🎉 Vous avez réservé {qty} billet(s) pour \"{event.title}\" !"
         return redirect('booking-success')
 
     # Si ce n'est pas POST, rediriger vers la page publique
@@ -855,7 +855,7 @@ def delete_reservation(request, reservation_id):
         time_difference = timezone.now() - reservation.created_at
 
         if time_difference.total_seconds() > 10800:
-            return JsonResponse({'status': 'error', 'message': 'You cannot delete this reservation after 3 hours.'})
+            return JsonResponse({'status': 'error', 'message': 'Vous ne pouvez pas annuler cette réservation après 3 heures.'})
 
         event = reservation.event
         event.available_tickets += reservation.quantity
@@ -1019,7 +1019,7 @@ def download_ticket_pdf(request, reservation_id):
 
     elements.append(Paragraph(reservation.secret_key, secret_style))
 
-    note = "This ticket grants one entry only. Present it at the entrance."
+    note = "Ce billet ne donne droit qu'à une seule entrée. Présentez-le à l'entrée."
     elements.append(Paragraph(note, note_style))
 
     doc.build(elements)

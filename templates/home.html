@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Home | Event Ticket Booking{% endblock %}
+{% block title %}Home | Réservation de billets pour l'événement{% endblock %}
 {% load static %}
 
 {% block content %}
 <div class="container my-5">
   {% if search_query %}
-    <h2 class="mb-4 text-primary">🔍 Showing results for "<span class="text-dark">{{ search_query }}</span>"</h2>
+    <h2 class="mb-4 text-primary">🔍 Résultats de la recherche pour "<span class="text-dark">{{ search_query }}</span>"</h2>
   {% else %}
-    <h2 class="mb-4 text-primary">🎉 Upcoming Events</h2>
+    <h2 class="mb-4 text-primary">🎉 Événements à venir</h2>
   {% endif %}
 
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -18,10 +18,10 @@
           <h5 class="card-title text-primary fw-bold mb-2">{{ event.title }}</h5>
           <p class="card-text text-muted small mb-3">{{ event.description|truncatewords:25 }}</p>
           <ul class="list-group list-group-flush mb-3 small">
-            <li class="list-group-item"><strong>📍 Location:</strong> {{ event.location }}</li>
+            <li class="list-group-item"><strong>📍 Lieu:</strong> {{ event.location }}</li>
             <li class="list-group-item"><strong>📅 Date:</strong> {{ event.date }}</li>
             <li class="list-group-item"><strong>🎫 Tickets:</strong> {{ event.available_tickets }}</li>
-            <li class="list-group-item"><strong>💵 Price:</strong> ${{ event.ticket_price }}</li>
+            <li class="list-group-item"><strong>💵 Prix:</strong> ${{ event.ticket_price }}</li>
           </ul>
 
           {% if request.user.is_authenticated and request.user.userprofile.role == 'attendee' %}
@@ -32,25 +32,25 @@
                 <input type="hidden" name="price" value="{{ event.ticket_price }}">
                 <div class="input-group mb-2">
 
-                  <a href="{% url 'event-detail' event.id %}" class="btn btn-success w-100 rounded-pill">🎟 Book Now</a>
+                  <a href="{% url 'event-detail' event.id %}" class="btn btn-success w-100 rounded-pill">🎟 Réservez maintenant</a>
 
 
                 </div>
               </form>
             {% else %}
-              <button class="btn btn-secondary w-100 rounded-pill" disabled>❌ Tickets Unavailable</button>
+              <button class="btn btn-secondary w-100 rounded-pill" disabled>❌ Tickets indisponibles</button>
             {% endif %}
           {% elif request.user.is_authenticated and request.user.userprofile.role == 'organizer' %}
             <div class="alert alert-warning text-center small mt-2 rounded-pill">
-              Organizers are not authorized to book tickets.
+              Les organisateurs ne sont pas autorisés à réserver des billets.
             </div>
           {% elif request.user.is_authenticated and request.user.userprofile.role == 'ambassador' %}
             <div class="alert alert-warning text-center small mt-2 rounded-pill">
-              Ambassadors are not authorized to book tickets.
+              Les ambassadeurs ne sont pas autorisés à réserver des billets.
             </div>
           {% else %}
             <div class="text-center text-muted small mt-2">
-              🔒 <a href="{% url 'login' %}" class="text-primary">Login</a> to book
+              🔒 <a href="{% url 'login' %}" class="text-primary">Se connecter</a> pour réserver
             </div>
           {% endif %}
         </div>
