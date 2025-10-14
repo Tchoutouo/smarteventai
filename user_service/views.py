@@ -137,7 +137,7 @@ def edit_profile_view(request):
         password = request.POST.get('password', '')
         confirm_password = request.POST.get('confirm_password', '')
         current_password = request.POST.get('current_password', '')
-
+        user.userprofile.email_consent = request.POST.get('email_consent') == 'on'
         user = request.user
 
         if not user.check_password(current_password):
@@ -178,7 +178,7 @@ def toggle_email_consent(request):
     profile.email_consent = not profile.email_consent
     profile.save()
     return redirect('profile')
-    
+
 
 def unsubscribe_view(request):
     user_id = request.GET.get('user')

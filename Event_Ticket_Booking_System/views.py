@@ -33,7 +33,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as canvas_module
 from ai_service.recommender import get_recommendations_for_event
 from ai_service.utils import update_event_embedding
-
+from ai_service.email_utils import send_recommendation_email_to_user
 
 
 
@@ -771,7 +771,11 @@ def book_ticket_view(request, event_id):
         profile.save()
 
         request.session['reservation_id'] = reservation.id
-
+        try:
+            send_recommendation_email_to_user(request.user, event)
+        except Exception as e:
+            # Ne pas bloquer la réservation si l’email échoue
+            print(f"Erreur envoi email recommandation : {e}")
         # === 8. Rediriger vers succès ===
         request.session['booking_message'] = f"🎉 Vous avez réservé {qty} billet(s) pour \"{event.title}\" !"
         return redirect('booking-success')
