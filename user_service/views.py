@@ -178,3 +178,16 @@ def toggle_email_consent(request):
     profile.email_consent = not profile.email_consent
     profile.save()
     return redirect('profile')
+    
+
+def unsubscribe_view(request):
+    user_id = request.GET.get('user')
+    if user_id and user_id.isdigit():
+        try:
+            profile = UserProfile.objects.get(user_id=int(user_id))
+            profile.email_consent = False
+            profile.save()
+            messages.success(request, "Vous avez été désabonné avec succès.")
+        except UserProfile.DoesNotExist:
+            messages.error(request, "Utilisateur introuvable.")
+    return render(request, 'unsubscribe_success.html')
