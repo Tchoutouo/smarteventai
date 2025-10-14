@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
-{% block title %}Create Event{% endblock %}
+{% block title %}Créer un événement{% endblock %}
 {% block content %}
 <div class="container col-md-8 mt-4">
-  <h2 class="mb-4 text-primary text-center">🎉 Create a New Event 🎉</h2>
+  <h2 class="mb-4 text-primary text-center">🎉 Créer un nouvel événement 🎉</h2>
 
   {% if messages %}
     {% for message in messages %}
@@ -13,7 +13,7 @@
   <form method="POST" action="">
     {% csrf_token %}
     <div class="mb-3">
-      <label class="form-label">Event Title</label>
+      <label class="form-label">Titre de l'événement</label>
       <input type="text" name="title" class="form-control" required>
     </div>
 
@@ -23,26 +23,26 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Location</label>
+      <label class="form-label">Lieu</label>
       <input type="text" name="location" class="form-control" required>
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Event Date</label>
+      <label class="form-label">Date de l'événement</label>
       <input type="date" name="date" class="form-control" min="{{ today }}" required>
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Ticket Price ($)</label>
+      <label class="form-label">Prix du billet ($)</label>
       <input type="number" name="ticket_price" class="form-control" step="0.01" min="0" required>
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Available Tickets</label>
+      <label class="form-label">Billets Disponibles</label>
       <input type="number" name="available_tickets" class="form-control" min="1" required>
     </div>
 
-    <button type="submit" class="btn btn-success w-100">Create Event</button>
+    <button type="submit" class="btn btn-success w-100">Créer l'événement</button>
   </form>
 </div>
 {% endblock %}

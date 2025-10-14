@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Redirecting to Payment{% endblock %}
+{% block title %}Redirection vers le paiement{% endblock %}
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 Swal.fire({
   icon: 'warning',
-  title: '⚠️ No Payment Card Found',
-  text: 'Redirecting you to the payment page in 5 seconds...',
+  title: '⚠️ Aucune carte de paiement trouvée',
+  text: 'Redirection vers la page de paiement dans 5 secondes...',
   toast: true,
   position: 'top-end',
   showConfirmButton: false,
@@ -19,9 +19,9 @@ Swal.fire({
 </script>
 <div class="container text-center mt-5">
   <div class="alert alert-warning p-4 shadow-sm">
-    <h4 class="mb-3">⚠️ No Payment Card on File</h4>
-    <p>Please add a payment card to proceed with your booking.</p>
-    <p class="text-muted">Redirecting shortly...</p>
+    <h4 class="mb-3">⚠️ Aucune carte de paiement trouvée</h4>
+    <p>Veuillez ajouter une carte de paiement pour procéder à votre réservation.</p>
+    <p class="text-muted">Redirection dans quelques instants...</p>
   </div>
 </div>
 {% endblock %}

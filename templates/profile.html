@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
-{% block title %}My Profile{% endblock %}
+{% block title %}Mon profil{% endblock %}
 
 {% block content %}
 <div class="container col-md-6 mt-5">
   <div class="card shadow-sm">
     <div class="card-header bg-primary text-white">
-      <h4 class="mb-0">👤 My Profile</h4>
+      <h4 class="mb-0">👤 Mon profil</h4>
     </div>
     <div class="card-body">
-      <p><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+      <p><strong>Nom complet:</strong> {{ user.first_name }} {{ user.last_name }}</p>
       <p><strong>Email:</strong> {{ user.email }}</p>
-      <p><strong>Role:</strong> {{ role|capfirst }}</p>
-      <p><strong>Date Joined:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
-      <p><strong>Username:</strong> {{ user.username }}</p>
+      <p><strong>Rôle:</strong> {{ role|capfirst }}</p>
+      <p><strong>Date d'inscription:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
+      <p><strong>Nom d'utilisateur:</strong> {{ user.username }}</p>
     </div>
     <form method="post" action="{% url 'toggle_email_consent' %}">
       {% csrf_token %}
@@ -26,7 +26,7 @@
       </div>
     </form>
     <div class="card-footer text-end">
-      <a href="{% url 'edit-profile' %}" class="btn btn-outline-primary">✏️ Edit Profile</a>
+      <a href="{% url 'edit-profile' %}" class="btn btn-outline-primary">✏️ Éditer le profil</a>
     </div>
   </div>
 </div>

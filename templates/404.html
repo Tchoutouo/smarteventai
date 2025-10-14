@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
-{% block title %}Page Not Found{% endblock %}
+{% block title %}Page non trouvée{% endblock %}
 
 {% block content %}
 <div class="container text-center mt-5">
     <div class="error-box">
         <h1 class="display-1 text-danger fw-bold animate-bounce">404</h1>
-        <h3 class="text-secondary">Oops! Page Not Found</h3>
-        <p class="lead text-muted">The page you're looking for doesn't exist or may have been moved.</p>
-        <a href="{% url 'about' %}" class="btn btn-primary btn-lg mt-3 animate-fade">🏠 Return Home</a>
+        <h3 class="text-secondary">Oops! Page non trouvée</h3>
+        <p class="lead text-muted">La page que vous recherchez n'existe pas ou a peut-être été déplacée.</p>
+        <a href="{% url 'about' %}" class="btn btn-primary btn-lg mt-3 animate-fade">🏠 Retour à l'accueil</a>
     </div>
 </div>
 

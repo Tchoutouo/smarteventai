@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Payment Dashboard{% endblock %}
+{% block title %}Tableau de bord de paiement{% endblock %}
 {% load static %}
 {% block content %}
 <div class="container my-5">
-  <h2 class="text-primary mb-4 text-center">💳 Payment Dashboard</h2>
+  <h2 class="text-primary mb-4 text-center">💳 Tableau de bord de paiement</h2>
 
  
 
@@ -24,16 +24,16 @@
     <div class="col-md-6">
       <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-primary text-white text-center fs-5 fw-semibold">
-          Your Payment Card
+          Votre carte de paiement
         </div>
         <div class="card-body">
           {% if card %}
             <ul class="list-group list-group-flush mb-3">
-              <li class="list-group-item"><strong>Card Holder:</strong> {{ card.card_holder }}</li>
-              <li class="list-group-item"><strong>Card Number:</strong> **** **** **** {{ card.card_number|slice:"-4:" }}</li>
-              <li class="list-group-item"><strong>Expiry:</strong> {{ card.expiry_month }}/{{ card.expiry_year }}</li>
+              <li class="list-group-item"><strong>Nom du titulaire:</strong> {{ card.card_holder }}</li>
+              <li class="list-group-item"><strong>Numéro de carte:</strong> **** **** **** {{ card.card_number|slice:"-4:" }}</li>
+              <li class="list-group-item"><strong>Date d'expiration:</strong> {{ card.expiry_month }}/{{ card.expiry_year }}</li>
               <li class="list-group-item">
-                <strong>Card Type:</strong>
+                <strong>Type de carte:</strong>
                 {% if card.card_type == "Visa" %}
                   <img src="{% static 'images/visa.png' %}" alt="Visa" width="60">
                 {% elif card.card_type == "Mastercard" %}
@@ -44,25 +44,25 @@
               </li>
             </ul>
             <div class="d-flex justify-content-center gap-2">
-              <button class="btn btn-secondary" disabled>✔️ Card Already Added</button>
+              <button class="btn btn-secondary" disabled>✔️ Carte déjà ajoutée</button>
               <form method="POST" action="{% url 'delete-payment-card' secure_token=secure_token %}" id="delete-card-form">
                 {% csrf_token %}
-                <button type="button" id="delete-card-btn" class="btn btn-danger">🗑 Delete Card</button>
+                <button type="button" id="delete-card-btn" class="btn btn-danger">🗑 Supprimer la carte</button>
               </form>
             </div>
           {% else %}
             <form method="POST" action="{% url 'add-payment-card' secure_token=secure_token %}">
               {% csrf_token %}
               <div class="mb-3">
-                <label class="form-label">Card Holder</label>
+                <label class="form-label">Nom du titulaire</label>
                 <input type="text" name="card_holder" class="form-control" required>
               </div>
               <div class="mb-3">
-                <label class="form-label">Card Number</label>
+                <label class="form-label">Numéro de carte</label>
                 <input type="text" name="card_number" class="form-control" maxlength="16" required>
               </div>
               <div class="mb-3">
-                <label class="form-label">Card Type</label>
+                <label class="form-label">Type de carte</label>
                 <select name="card_type" class="form-select">
                   <option value="Visa">Visa</option>
                   <option value="Mastercard">Mastercard</option>
@@ -70,7 +70,7 @@
               </div>
               <div class="row mb-3">
                 <div class="col">
-                  <label class="form-label">Expiry Month</label>
+                  <label class="form-label">Mois d'expiration</label>
                   <select name="expiry_month" class="form-select">
                     {% for m in months %}
                       <option value="{{ m }}">{{ m }}</option>
@@ -78,7 +78,7 @@
                   </select>
                 </div>
                 <div class="col">
-                  <label class="form-label">Expiry Year</label>
+                  <label class="form-label">Année d'expiration</label>
                   <select name="expiry_year" class="form-select">
                     {% for y in years %}
                       <option value="{{ y }}">{{ y }}</option>
@@ -86,7 +86,7 @@
                   </select>
                 </div>
               </div>
-              <button type="submit" class="btn btn-success w-100">💾 Add Card</button>
+              <button type="submit" class="btn btn-success w-100">💾 Ajouter la carte</button>
             </form>
           {% endif %}
         </div>
@@ -97,20 +97,20 @@
     <div class="col-md-6">
       <div class="card shadow-sm border-0">
         <div class="card-header bg-success text-white text-center fs-5 fw-semibold">
-          Purchase Summary
+          Résumé de l'achat
         </div>
         <div class="card-body">
           <!-- Total Boxes Row -->
           <div class="row justify-content-center g-3 mb-4">
             <div class="col-md-6 col-12">
               <div class="border rounded p-3 bg-light text-center shadow-sm h-100">
-                <div class="fs-5 fw-semibold text-success mb-1">💰 Total Spent</div>
+                <div class="fs-5 fw-semibold text-success mb-1">💰 Total Dépensé</div>
                 <div class="fs-4 fw-bold text-success">${{ total_spent|floatformat:2 }}</div>
               </div>
             </div>
             <div class="col-md-6 col-12">
               <div class="border rounded p-3 bg-light text-center shadow-sm h-100">
-                <div class="fs-5 fw-semibold text-primary mb-1">📄 Page Total</div>
+                <div class="fs-5 fw-semibold text-primary mb-1">📄 Total de la page</div>
                 <div class="fs-4 fw-bold text-primary">${{ page_total|floatformat:2 }}</div>
               </div>
             </div>
@@ -167,7 +167,7 @@
             {% endif %}
           {% else %}
             <div class="alert alert-info text-center rounded-pill shadow-sm mt-4 fs-6 fw-semibold" role="alert">
-              🚫 No purchases yet
+              🚫 Aucun achat pour le moment
             </div>
           {% endif %}
         </div>
@@ -181,13 +181,13 @@
 <script>
   document.getElementById("delete-card-btn")?.addEventListener("click", function () {
     Swal.fire({
-      title: 'Are you sure?',
-      text: "Card Number: **** **** **** {{ card.card_number|slice:'-4:' }}",
+      title: 'Es-tu sûr?',
+      text: "Numéro de carte: **** **** **** {{ card.card_number|slice:'-4:' }}",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonText: 'Oui, supprime-le!'
     }).then((result) => {
       if (result.isConfirmed) {
         document.getElementById("delete-card-form").submit();

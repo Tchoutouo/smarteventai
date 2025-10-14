@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Profile Updated{% endblock %}
+{% block title %}Profil mis à jour{% endblock %}
 
 {% block content %}
 <div class="container text-center mt-5">
-  <h3 class="text-success">✅ Profile updated successfully!</h3>
-  <p>You will be logged out in <span id="countdown">5</span> seconds...</p>
-  <a href="{% url 'logout' %}" class="btn btn-outline-danger mt-3">Logout Now</a>
+  <h3 class="text-success">✅ Profil mis à jour avec succès!</h3>
+  <p>Vous serez déconnecté dans <span id="countdown">5</span> secondes...</p>
+  <a href="{% url 'logout' %}" class="btn btn-outline-danger mt-3">Se déconnecter maintenant</a>
 </div>
 
 <script>

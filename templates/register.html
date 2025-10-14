@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container mt-5 col-md-6">
-  <h2 class="text-center text-primary">Register</h2>
+  <h2 class="text-center text-primary">S'inscrire</h2>
 
   {% if messages %}
     {% for message in messages %}
@@ -18,12 +18,12 @@
     {% csrf_token %}
 
     <div class="mb-3">
-      <label class="form-label">First Name</label>
+      <label class="form-label">Prénom</label>
       <input type="text" name="first_name" class="form-control" required value="{{ request.POST.first_name }}">
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Last Name</label>
+      <label class="form-label">Nom de famille</label>
       <input type="text" name="last_name" class="form-control" required value="{{ request.POST.last_name }}">
     </div>
 
@@ -33,7 +33,7 @@
     </div>
 
     <div class="mb-3 position-relative">
-      <label class="form-label">Password</label>
+      <label class="form-label">Mot de passe</label>
       <input type="password" id="password" name="password" class="form-control" required>
       <span class="position-absolute top-50 end-0 translate-middle-y pe-3" style="cursor: pointer;" onclick="toggleVisibility('password', this)">
         👁️
@@ -41,7 +41,7 @@
     </div>
 
     <div class="mb-3 position-relative">
-      <label class="form-label">Verify Password</label>
+      <label class="form-label">Confirmer le mot de passe</label>
       <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
       <span class="position-absolute top-50 end-0 translate-middle-y pe-3" style="cursor: pointer;" onclick="toggleVisibility('confirm_password', this)">
         👁️
@@ -49,29 +49,29 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Select Role</label>
+      <label class="form-label">Sélectionner un rôle</label>
       <select name="role" class="form-select" required>
-        <option value="">-- Choose your role --</option>
-        <option value="attendee" {% if request.POST.role == "attendee" %}selected{% endif %}>Attendee</option>
-        <option value="organizer" {% if request.POST.role == "organizer" %}selected{% endif %}>Organizer</option>
-        <option value="ambassador" {% if request.POST.role == "ambassador" %}selected{% endif %}>Ambassador</option>
+        <option value="">-- Choisissez votre rôle --</option>
+        <option value="attendee" {% if request.POST.role == "attendee" %}selected{% endif %}>Participant</option>
+        <option value="organizer" {% if request.POST.role == "organizer" %}selected{% endif %}>Organisateur</option>
+        <option value="ambassador" {% if request.POST.role == "ambassador" %}selected{% endif %}>Ambassadeur</option>
       </select>
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Password must contain:</label>
+      <label class="form-label">Le mot de passe doit contenir :</label>
       <ul class="list-unstyled" id="password-criteria">
-        <li id="length" class="text-danger">❌ At least 8 characters</li>
-        <li id="lower" class="text-danger">❌ One lowercase letter</li>
-        <li id="upper" class="text-danger">❌ One uppercase letter</li>
-        <li id="number" class="text-danger">❌ One number</li>
-        <li id="symbol" class="text-danger">❌ One symbol</li>
-        <li id="match" class="text-danger">❌ Passwords must match</li>
+        <li id="length" class="text-danger">❌ Au moins 8 caractères</li>
+        <li id="lower" class="text-danger">❌ Une lettre minuscule</li>
+        <li id="upper" class="text-danger">❌ Une lettre majuscule</li>
+        <li id="number" class="text-danger">❌ Un chiffre</li>
+        <li id="symbol" class="text-danger">❌ Un symbole</li>
+        <li id="match" class="text-danger">❌ Les mots de passe doivent correspondre</li>
       </ul>
     </div>
 
-    <button type="submit" class="btn btn-success w-100">Register</button>
-    <p class="mt-3 text-center">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+    <button type="submit" class="btn btn-success w-100">S'inscrire</button>
+    <p class="mt-3 text-center">Vous avez déjà un compte ? <a href="{% url 'login' %}">Connexion</a></p>
   </form>
 </div>
 

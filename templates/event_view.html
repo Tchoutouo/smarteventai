@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}{{ event.title }} - Organizer{% endblock %}
+{% block title %}{{ event.title }} - Organisateur{% endblock %}
 
 {% block content %}
 <div class="container my-5">
@@ -13,11 +13,11 @@
   <div class="alert
     {% if event.available_tickets > 0 %}bg-success bg-opacity-10 border-success{% else %}bg-danger bg-opacity-10 border-danger{% endif %}
     border-start border-5 rounded-4 shadow-sm p-3 mb-4">
-    <strong>Status:</strong>
+    <strong>Statut:</strong>
     {% if event.available_tickets > 0 %}
-      <span class="text-success">✅ Active ({{ event.available_tickets }} tickets left)</span>
+      <span class="text-success">✅ Actif ({{ event.available_tickets }} Tickets restants)</span>
     {% else %}
-      <span class="text-danger">❌ Sold Out</span>
+      <span class="text-danger">❌ Épuisé</span>
     {% endif %}
   </div>
 
@@ -34,25 +34,25 @@
     <div class="col-md-8">
       <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body">
-          <h5 class="fw-bold mb-3">Event Details</h5>
+          <h5 class="fw-bold mb-3">Détails de l'événement</h5>
           <ul class="list-group list-group-flush">
             <li class="list-group-item d-flex justify-content-between">
               <span>📅 Date:</span> <strong>{{ event.date }}</strong>
             </li>
             <li class="list-group-item d-flex justify-content-between">
-              <span>📍 Location:</span> <strong>{{ event.location }}</strong>
+              <span>📍 Lieu:</span> <strong>{{ event.location }}</strong>
             </li>
             <li class="list-group-item d-flex justify-content-between">
-              <span>🎟 Total Tickets:</span> <strong>{{ event.total_tickets }}</strong>
+              <span>🎟 Total de billets:</span> <strong>{{ event.total_tickets }}</strong>
             </li>
             <li class="list-group-item d-flex justify-content-between">
-              <span>🎫 Available:</span> <strong>{{ event.available_tickets }}</strong>
+              <span>🎫 Disponibles:</span> <strong>{{ event.available_tickets }}</strong>
             </li>
             <li class="list-group-item d-flex justify-content-between">
-              <span>💵 Price:</span> <strong>${{ event.ticket_price }}</strong>
+              <span>💵 Prix:</span> <strong>${{ event.ticket_price }}</strong>
             </li>
             <li class="list-group-item d-flex justify-content-between">
-              <span>💰 Revenue:</span> <strong>${{ event.event_revenue|floatformat:2 }}</strong>
+              <span>💰 Revenus:</span> <strong>${{ event.event_revenue|floatformat:2 }}</strong>
             </li>
             <li class="list-group-item">
               <span>📝 Description:</span><br>
@@ -174,15 +174,15 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3"><label class="form-label">Title</label><input type="text" name="title" class="form-control" value="{{ event.title }}" required></div>
+          <div class="mb-3"><label class="form-label">Titre</label><input type="text" name="title" class="form-control" value="{{ event.title }}" required></div>
           <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="3" required>{{ event.description }}</textarea></div>
           <div class="mb-3">
             <label class="form-label">Date</label>
             <input type="date" name="date" class="form-control" value="{{ event.date|date:'Y-m-d' }}" min="{{ today }}" max="{{ max_date }}" required>
           </div>
-          <div class="mb-3"><label class="form-label">Location</label><input type="text" name="location" class="form-control" value="{{ event.location }}" required></div>
-          <div class="mb-3"><label class="form-label">Ticket Price ($)</label><input type="number" name="ticket_price" min="0" step="0.01" class="form-control" value="{{ event.ticket_price }}" required></div>
-          <div class="mb-3"><label class="form-label">Available Tickets</label><input type="number" name="available_tickets" min="0" class="form-control" value="{{ event.available_tickets }}" required></div>
+          <div class="mb-3"><label class="form-label">Lieu</label><input type="text" name="location" class="form-control" value="{{ event.location }}" required></div>
+          <div class="mb-3"><label class="form-label">Prix du billet ($)</label><input type="number" name="ticket_price" min="0" step="0.01" class="form-control" value="{{ event.ticket_price }}" required></div>
+          <div class="mb-3"><label class="form-label">Billets disponibles</label><input type="number" name="available_tickets" min="0" class="form-control" value="{{ event.available_tickets }}" required></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
