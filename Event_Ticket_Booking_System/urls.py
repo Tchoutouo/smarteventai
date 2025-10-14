@@ -34,8 +34,16 @@ from user_service.views import (
 from django.conf import settings
 from django.conf.urls.static import static
 
+from django.http import HttpResponseNotFound
+
+# Ignorer silencieusement les requêtes de Chrome DevTools
+def ignore_well_known(request, path):
+    return HttpResponseNotFound()
+
 
 urlpatterns = [
+    path('.well-known/<path:path>', ignore_well_known),
+    
     path('admin/', admin.site.urls),
 
     # Microservices
@@ -93,6 +101,9 @@ path('reservation/complete/', complete_pending_reservation, name='complete-pendi
 
     path('event/', include('event_service.urls')),
     path('download-ticket/<int:reservation_id>/', download_ticket_pdf, name='download_ticket'),
+
+    # chatbot AI
+    path('', include('ai_service.urls')),
 ]
 
 handler404 = not_found_view

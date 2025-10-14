@@ -8,6 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 </head>
+
 <body>
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-3">
@@ -119,5 +120,158 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{% static 'js/main.js' %}"></script>
+
+  <!-- SmartEventAI Chatbot Widget -->
+  <div id="chatbot-container" style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 360px;
+      max-width: 95vw;
+      z-index: 10000;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      border-radius: 16px;
+      overflow: hidden;
+      display: none;
+  ">
+    <div id="chat-header" style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 14px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    ">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>💬</span>
+        <strong>Assistant SmartEventAI</strong>
+      </div>
+      <button id="chat-minimize" style="
+          background: rgba(255,255,255,0.2);
+          border: none;
+          color: white;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          font-size: 14px;
+          cursor: pointer;
+      ">−</button>
+    </div>
+    
+    <div id="chat-body" style="
+        height: 400px;
+        overflow-y: auto;
+        padding: 16px;
+        background: #f9f9ff;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    ">
+      <div style="color: #555; font-size: 14px;">
+        <strong>Bot :</strong> Bonjour ! Posez-moi une question sur les événements ou la plateforme.
+      </div>
+    </div>
+    
+    <div style="padding: 12px; background: white; border-top: 1px solid #eee;">
+      <input type="text" id="chat-input" placeholder="Tapez votre question..." style="
+          width: 100%;
+          padding: 10px 14px;
+          border: 1px solid #ddd;
+          border-radius: 24px;
+          outline: none;
+          font-size: 14px;
+          box-sizing: border-box;
+      " />
+    </div>
+  </div>
+
+  <button id="chat-toggle" style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+      z-index: 9999;
+  ">💬</button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('chat-toggle');
+      const container = document.getElementById('chatbot-container');
+      const minimizeBtn = document.getElementById('chat-minimize');
+      const body = document.getElementById('chat-body');
+      const input = document.getElementById('chat-input');
+
+      // Charger l'historique au démarrage
+      async function loadHistory() {
+        try {
+          const res = await fetch('/api/chat/history/', {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            body.innerHTML = '';
+            data.history.forEach(msg => {
+              const align = msg.role === 'user' ? 'flex-end' : 'flex-start';
+              const bg = msg.role === 'user' ? '#e0e0ff' : '#f0f0f0';
+              const color = msg.role === 'user' ? '#2c3e50' : '#27ae60';
+              body.innerHTML += `<div style="align-self: ${align}; max-width: 80%; background: ${bg}; padding: 10px; border-radius: ${msg.role === 'user' ? '18px 0 18px 18px' : '0 18px 18px 18px'}; font-size: 14px; color: ${color};">${msg.content}</div>`;
+            });
+            body.scrollTop = body.scrollHeight;
+          }
+        } catch (e) {
+          console.log("Pas d'historique");
+        }
+      }
+
+      toggleBtn.onclick = () => {
+        container.style.display = 'block';
+        toggleBtn.style.display = 'none';
+        loadHistory();
+      };
+
+      minimizeBtn.onclick = () => {
+        container.style.display = 'none';
+        toggleBtn.style.display = 'block';
+      };
+
+      input.onkeypress = async (e) => {
+        if (e.key === 'Enter') {
+          const question = input.value.trim();
+          console.log("Question de l'utilisateur :", question);
+          if (!question) return;
+          
+          body.innerHTML += `<div style="align-self: flex-end; max-width: 80%; background: #e0e0ff; padding: 10px; border-radius: 18px 0 18px 18px; font-size: 14px; color: #2c3e50;">${question}</div>`;
+          input.value = '';
+          body.scrollTop = body.scrollHeight;
+
+          try {
+            const res = await fetch('/api/chat/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ question })
+            });
+            const data = await res.json();
+            console.log("Réponse du serveur :", data);
+            
+            body.innerHTML += `<div style="align-self: flex-start; max-width: 80%; background: #f0f0f0; padding: 10px; border-radius: 0 18px 18px 18px; font-size: 14px; color: #27ae60;">${data.answer}</div>`;
+            body.scrollTop = body.scrollHeight;
+          } catch (err) {
+            body.innerHTML += `<div style="align-self: flex-start; max-width: 80%; background: #ffe0e0; padding: 10px; border-radius: 0 18px 18px 18px; font-size: 14px; color: red;">Erreur de connexion.</div>`;
+          }
+        }
+      };
+    });
+  </script>
 </body>
 </html>
