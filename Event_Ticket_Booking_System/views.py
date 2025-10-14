@@ -781,7 +781,7 @@ def book_ticket_view(request, event_id):
         return redirect('booking-success')
 
     # Si ce n'est pas POST, rediriger vers la page publique
-    return redirect('event-public-detail', event_id=event_id)
+    return redirect('event_public_detail', event_id=event_id)
 
 
 @login_required
