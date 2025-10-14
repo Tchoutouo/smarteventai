@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Home | Réservation de billets pour l'événement{% endblock %}
+{% block title %}Accueil | Réservation de billets pour l'événement{% endblock %}
 {% load static %}
 
 {% block content %}
@@ -20,7 +20,7 @@
           <ul class="list-group list-group-flush mb-3 small">
             <li class="list-group-item"><strong>📍 Lieu:</strong> {{ event.location }}</li>
             <li class="list-group-item"><strong>📅 Date:</strong> {{ event.date }}</li>
-            <li class="list-group-item"><strong>🎫 Tickets:</strong> {{ event.available_tickets }}</li>
+            <li class="list-group-item"><strong>🎫 billets:</strong> {{ event.available_tickets }}</li>
             <li class="list-group-item"><strong>💵 Prix:</strong> ${{ event.ticket_price }}</li>
           </ul>
 
@@ -38,7 +38,7 @@
                 </div>
               </form>
             {% else %}
-              <button class="btn btn-secondary w-100 rounded-pill" disabled>❌ Tickets indisponibles</button>
+              <button class="btn btn-secondary w-100 rounded-pill" disabled>❌ billets indisponibles</button>
             {% endif %}
           {% elif request.user.is_authenticated and request.user.userprofile.role == 'organizer' %}
             <div class="alert alert-warning text-center small mt-2 rounded-pill">

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Register{% endblock %}
+{% block title %}S'inscrire{% endblock %}
 
 {% block content %}
 <div class="container mt-5 col-md-6">
@@ -92,12 +92,12 @@
     const val = password.value;
     const confirmVal = confirmPassword.value;
 
-    criteria.length.textContent = (val.length >= 8 ? "✅" : "❌") + " At least 8 characters";
-    criteria.lower.textContent = (/[a-z]/.test(val) ? "✅" : "❌") + " One lowercase letter";
-    criteria.upper.textContent = (/[A-Z]/.test(val) ? "✅" : "❌") + " One uppercase letter";
-    criteria.number.textContent = (/\d/.test(val) ? "✅" : "❌") + " One number";
-    criteria.symbol.textContent = (/[^A-Za-z0-9]/.test(val) ? "✅" : "❌") + " One symbol";
-    criteria.match.textContent = (val && confirmVal && val === confirmVal ? "✅" : "❌") + " Passwords must match";
+    criteria.length.textContent = (val.length >= 8 ? "✅" : "❌") + " Au moins 8 caractères";
+    criteria.lower.textContent = (/[a-z]/.test(val) ? "✅" : "❌") + " Une lettre minuscule";
+    criteria.upper.textContent = (/[A-Z]/.test(val) ? "✅" : "❌") + " Une lettre majuscule";
+    criteria.number.textContent = (/\d/.test(val) ? "✅" : "❌") + " Un chiffre";
+    criteria.symbol.textContent = (/[^A-Za-z0-9]/.test(val) ? "✅" : "❌") + " Un symbole";
+    criteria.match.textContent = (val && confirmVal && val === confirmVal ? "✅" : "❌") + " Les mots de passe doivent correspondre";
 
     for (let key in criteria) {
       criteria[key].classList.remove("text-danger", "text-success");
