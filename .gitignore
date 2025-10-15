@@ -71,3 +71,8 @@ logs/*
 
 # cache files
 .cache
+*.pt
+*.bin
+*.zip
+*.gguf
+*.ckpt
