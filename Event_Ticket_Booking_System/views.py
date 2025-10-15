@@ -2,6 +2,8 @@ import io
 import os
 import qrcode, base64
 from io import BytesIO
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from datetime import datetime, timedelta, date
@@ -34,6 +36,9 @@ from reportlab.pdfgen import canvas as canvas_module
 from ai_service.recommender import get_recommendations_for_event
 from ai_service.utils import update_event_embedding
 
+import logging
+
+logger = logging.getLogger("django")
 
 
 
@@ -700,6 +705,56 @@ def book_ticket_view(request, event_id):
                     )
                     # Créer le profil
                     UserProfile.objects.create(user=user, role='attendee')
+
+                    try:
+                        """Send verification mail"""
+                        from_email = settings.DEFAULT_FROM_EMAIL
+                        mail_subject = "Account Registration Confirmation"
+                        to_email = user.email
+
+                        server_ip = settings.IP_ADDRESS
+                        port = "8000"
+                        login_url = f"http://{server_ip}:{port}/login/"
+
+                        msge = render_to_string(
+                            "email/confirm_mail_attendee.txt",
+                            {
+                                "username": user.email,
+                                "login_url": login_url,
+                                "password": password,
+                                "first_name": first_name,
+                                "last_name": last_name
+                            },
+                        )
+
+                        msge_html = render_to_string(
+                            "email/confirm_mail_attendee.html",
+                            {
+                                "username": user.email,
+                                "login_url": login_url,
+                                "password": password,
+                                "first_name": first_name,
+                                "last_name": last_name
+                            },
+                        )
+                        send_mail(
+                            mail_subject,
+                            msge,
+                            from_email,
+                            [to_email, ],
+                            fail_silently=False,
+                            html_message=msge_html,
+                        )
+                        logger.info(f"Send verification email for {user.email}")
+                        logger.info(f"Send New User {user.email} notification to Project...")
+
+                        messages.success(request, 'Your account has been  registered successfully!')
+
+                    except Exception as e:
+                        print(e)
+                        msg = "Error sending the verification message"
+                        messages.error(request, msg)
+                        logger.error(f"Error sending the verification message: {e}")
 
             # Mettre à jour le prénom/nom si différent (au cas où)
             if user.first_name != first_name or user.last_name != last_name:

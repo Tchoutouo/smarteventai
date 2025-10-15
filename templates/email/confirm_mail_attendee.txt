@@ -1,0 +1,15 @@
+{% autoescape off %}
+Bonjour {{ first_name }} {{ last_name }}!
+
+Avec votre reservation, un compte a été créé en votre nom avec l'adresse {{ username }} avec comme mot de passe {{ password }}.
+
+Vous pouvez dès à présent vous connecter à votre compte en cliquant sur le lien ci-dessous :
+{{ login_url }}
+
+Merci de votre confiance et bienvenue parmi nous !
+
+Cordialement,
+L’équipe SmartEventAi
+
+------------------------------------------
+{% endautoescape %}

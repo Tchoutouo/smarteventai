@@ -1,0 +1,15 @@
+{% autoescape off %}
+Bonjour {{ username }}!
+
+Votre inscription a bien été enregistrée.
+
+Vous pouvez dès à présent vous connecter à votre compte en cliquant sur le lien ci-dessous :
+{{ login_url }}
+
+Merci de votre confiance et bienvenue parmi nous !
+
+Cordialement,
+L’équipe SmartEventAi
+
+------------------------------------------
+{% endautoescape %}
