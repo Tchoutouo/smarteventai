@@ -64,8 +64,7 @@ Thumbs.db
 db.sqlite3
 
 # AI MODELS
-ai_services/models/*
-!ai_services/models/.gitkeep    
+ai_service/models/*
 
 # Logs
 logs/*
