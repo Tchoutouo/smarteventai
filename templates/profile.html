@@ -1,32 +1,114 @@
 {% extends 'base.html' %}
-{% block title %}Mon profil{% endblock %}
+{% block title %}Mon profil • SmartEventAI{% endblock %}
 
 {% block content %}
-<div class="container col-md-6 mt-5">
-  <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-      <h4 class="mb-0">👤 Mon profil</h4>
+<style>
+  .profile-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    animation: fadeIn 0.4s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .profile-card {
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+  .profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .profile-header h4 {
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.4rem;
+  }
+  .profile-body {
+    padding: 2rem;
+    background: #fff;
+  }
+  .profile-info {
+    margin-bottom: 1.8rem;
+  }
+  .profile-info p {
+    margin: 0.65rem 0;
+    font-size: 0.95rem;
+    color: #4a5568;
+  }
+  .profile-info strong {
+    color: #2d3748;
+    min-width: 140px;
+    display: inline-block;
+  }
+  .email-consent-form {
+    background: #f8fafc;
+    padding: 1.2rem;
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+  }
+  .btn-save {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 0.65rem 1.2rem;
+    font-weight: 600;
+    color: white;
+    border-radius: 12px;
+    transition: all 0.25s ease;
+  }
+  .btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+  }
+  .btn-edit {
+    background: transparent;
+    border: 1px solid #667eea;
+    color: #667eea;
+    padding: 0.65rem 1.2rem;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.25s ease;
+  }
+  .btn-edit:hover {
+    background: #f0f4ff;
+  }
+</style>
+
+<div class="profile-container">
+  <div class="profile-card">
+    <div class="profile-header">
+      <h4>👤 Mon profil</h4>
     </div>
-    <div class="card-body">
-      <p><strong>Nom complet:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <p><strong>Rôle:</strong> {{ role|capfirst }}</p>
-      <p><strong>Date d'inscription:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
-      <p><strong>Nom d'utilisateur:</strong> {{ user.username }}</p>
-    </div>
-    <form method="post">
-      {% csrf_token %}
-      <div class="form-check mb-3">
+    <div class="profile-body">
+      <div class="profile-info">
+        <p><strong>Nom complet :</strong> {{ user.first_name|default:"—" }} {{ user.last_name|default:"—" }}</p>
+        <p><strong>Nom d’utilisateur :</strong> {{ user.username }}</p>
+        <p><strong>Email :</strong> {{ user.email }}</p>
+        <p><strong>Rôle :</strong> {{ role|capfirst }}</p>
+        <p><strong>Inscrit le :</strong> {{ user.date_joined|date:"d F Y" }}</p>
+      </div>
+
+      <form method="post" class="email-consent-form">
+        {% csrf_token %}
+        <div class="form-check">
           <input class="form-check-input" type="checkbox" id="id_email_consent" name="email_consent"
                 {% if user.userprofile.email_consent %}checked{% endif %}>
           <label class="form-check-label" for="id_email_consent">
-              Recevoir des recommandations d’événements par email
+            Recevoir des recommandations d’événements par email
           </label>
+        </div>
+        <button type="submit" class="btn btn-save mt-2">Sauvegarder les préférences</button>
+      </form>
+
+      <div class="text-center">
+        <a href="{% url 'edit-profile' %}" class="btn btn-edit">
+          ✏️ Éditer mon profil
+        </a>
       </div>
-      <button type="submit" class="btn btn-primary">Sauvegarder</button>
-    </form>
-    <div class="card-footer text-end">
-      <a href="{% url 'edit-profile' %}" class="btn btn-outline-primary">✏️ Éditer le profil</a>
     </div>
   </div>
 </div>

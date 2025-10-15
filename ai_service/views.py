@@ -55,7 +55,12 @@ def chat_view(request):
         return JsonResponse({"answer": answer})
     
     except Exception as e:
-        return JsonResponse({"error": "Erreur interne"}, status=500)
+    # Log l'erreur dans la console pour déboguer
+        print(f"❌ Erreur dans chat_view : {e}")
+        return JsonResponse({
+            "answer": "Désolé, une erreur est survenue. Réessayez plus tard.",
+            "error": str(e)  # Pour debug
+        })
 
 
 

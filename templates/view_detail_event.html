@@ -6,12 +6,50 @@
   <h2>{{ event.title }}</h2>
 
   <div class="row g-4">
-  <div class="col-lg-8">
+  <div class="col-lg-6">
     {% if event.cover_image %}
       <img src="{{ event.cover_image.url }}" class="img-fluid rounded-4 mb-4" alt="{{ event.title }}">
     {% endif %}
     <!-- ... description ... -->
   </div>
+  {% if is_ambassador %}
+    
+    <div class="col-lg-6">
+      <div class="card mt-4">
+      <div class="card-header bg-success bg-opacity-10">
+        <h5 class="mb-0">🔗 Votre lien de partage</h5>
+      </div>
+      <div class="card-body text-center">
+        <p class="text-muted mb-3">Partagez ce QR code ou ce lien pour générer des réservations :</p>
+
+        <!-- QR Code -->
+        <div class="mb-3">
+          <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code" class="img-fluid" style="max-width: 200px;">
+        </div>
+
+        <!-- Lien cliquable -->
+        <div class="input-group mb-2">
+          <input type="text" class="form-control form-control-sm" value="{{ shareable_url }}" readonly>
+          <button class="btn btn-outline-secondary btn-sm" type="button" onclick="copyToClipboard()">📋 Copier</button>
+        </div>
+
+        <small class="text-muted">Les réservations faites via ce lien vous seront attribuées.</small>
+      </div>
+    </div>
+
+    <script>
+      function copyToClipboard() {
+        const url = "{{ shareable_url }}";
+        navigator.clipboard.writeText(url).then(() => {
+          Swal.fire({ icon: 'success', title: 'Lien copié !', timer: 1000, showConfirmButton: false });
+        });
+      }
+    </script>
+    </div>
+    <div class="alert alert-success">
+      🤝 Vous êtes ambassadeur pour cet événement.
+    </div>
+  {% endif %}
 </div>
 
   <!-- Infos communes -->
@@ -88,36 +126,7 @@
       </div>
     </div>
 
-    <div class="card mt-4">
-    <div class="card-header bg-success bg-opacity-10">
-      <h5 class="mb-0">🔗 Votre lien de partage</h5>
-    </div>
-    <div class="card-body text-center">
-      <p class="text-muted mb-3">Partagez ce QR code ou ce lien pour générer des réservations :</p>
-
-      <!-- QR Code -->
-      <div class="mb-3">
-        <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code" class="img-fluid" style="max-width: 200px;">
-      </div>
-
-      <!-- Lien cliquable -->
-      <div class="input-group mb-2">
-        <input type="text" class="form-control form-control-sm" value="{{ shareable_url }}" readonly>
-        <button class="btn btn-outline-secondary btn-sm" type="button" onclick="copyToClipboard()">📋 Copier</button>
-      </div>
-
-      <small class="text-muted">Les réservations faites via ce lien vous seront attribuées.</small>
-    </div>
-  </div>
-
-  <script>
-    function copyToClipboard() {
-      const url = "{{ shareable_url }}";
-      navigator.clipboard.writeText(url).then(() => {
-        Swal.fire({ icon: 'success', title: 'Lien copié !', timer: 1000, showConfirmButton: false });
-      });
-    }
-  </script>
+    
   {% endif %}
 
   <!-- === Modals (organisateur uniquement) === -->

@@ -1,64 +1,151 @@
 {% extends 'base.html' %}
-{% block title %}Modifier le profil{% endblock %}
+{% block title %}Modifier le profil • SmartEventAI{% endblock %}
 
 {% block content %}
-<div class="container col-md-6 mt-4">
-  <h2 class="text-center text-primary mb-4">Modifier le profil</h2>
+<style>
+  .edit-profile-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    animation: fadeIn 0.4s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .edit-profile-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+  .edit-profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .edit-profile-header h2 {
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.4rem;
+  }
+  .edit-profile-body {
+    padding: 2rem;
+  }
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin: 1.5rem 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #edf2f7;
+  }
+  .form-control {
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    transition: all 0.25s ease;
+  }
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    outline: none;
+  }
+  .password-criteria {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+  }
+  .password-criteria li {
+    margin: 0.35rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .btn-update {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 0.85rem;
+    font-weight: 600;
+    color: white;
+    border-radius: 12px;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+  .btn-update:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+  .email-consent-form {
+    margin-top: 1.2rem;
+  }
+</style>
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-
-  <form method="POST" action="{% url 'edit-profile' %}">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label class="form-label">Nom Complet</label>
-      <input type="text" name="full_name" class="form-control" required value="{{ user.first_name }}">
+<div class="edit-profile-container">
+  <div class="edit-profile-card">
+    <div class="edit-profile-header">
+      <h2>✏️ Modifier mon profil</h2>
     </div>
+    <div class="edit-profile-body">
 
-    <div class="mb-3">
-      <label class="form-label">Mot de Passe Actuel</label>
-      <input type="password" name="current_password" class="form-control" required>
-    </div>
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
 
-    <div class="mb-3">
-      <label class="form-label">Nouveau Mot de Passe</label>
-      <input type="password" id="password" name="password" class="form-control">
-    </div>
+      <form method="POST" action="{% url 'edit-profile' %}">
+        {% csrf_token %}
 
-    <div class="mb-3">
-      <label class="form-label">Confirmer le Nouveau Mot de Passe</label>
-      <input type="password" id="confirm_password" name="confirm_password" class="form-control">
-    </div>
+        <h3 class="section-title">👤 Informations personnelles</h3>
+        <div class="mb-3">
+          <input type="text" name="full_name" class="form-control" placeholder="Nom complet" required value="{{ user.first_name }}">
+        </div>
 
-    <!-- Password Strength Checker -->
-    <div class="mb-3">
-      <label class="form-label">Le mot de passe doit contenir :</label>
-      <ul class="list-unstyled" id="password-criteria">
-        <li id="length" class="text-danger">❌ Au moins 8 caractères</li>
-        <li id="lower" class="text-danger">❌ Une lettre minuscule</li>
-        <li id="upper" class="text-danger">❌ Une lettre majuscule</li>
-        <li id="number" class="text-danger">❌ Un chiffre</li>
-        <li id="symbol" class="text-danger">❌ Un symbole</li>
-      </ul>
-    </div>
-    <form method="post" action="{% url 'toggle_email_consent' %}">
-      {% csrf_token %}
-      <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="emailConsent"
-                {% if user.userprofile.email_consent %}checked{% endif %}
-                onchange="this.form.submit()">
-          <label class="form-check-label" for="emailConsent">
+        <h3 class="section-title">🔒 Changer le mot de passe</h3>
+        <div class="mb-3">
+          <input type="password" name="current_password" class="form-control" placeholder="Mot de passe actuel" required>
+        </div>
+        <div class="mb-3">
+          <input type="password" id="password" name="password" class="form-control" placeholder="Nouveau mot de passe">
+        </div>
+        <div class="mb-3">
+          <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Confirmer le nouveau mot de passe">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Votre mot de passe doit contenir :</label>
+          <ul class="password-criteria" id="password-criteria">
+            <li id="length">❌ Au moins 8 caractères</li>
+            <li id="lower">❌ Une lettre minuscule</li>
+            <li id="upper">❌ Une lettre majuscule</li>
+            <li id="number">❌ Un chiffre</li>
+            <li id="symbol">❌ Un symbole (@, #, $, etc.)</li>
+          </ul>
+        </div>
+
+        <h3 class="section-title">📬 Préférences</h3>
+        <form method="post" action="{% url 'toggle_email_consent' %}" class="email-consent-form">
+          {% csrf_token %}
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="emailConsent"
+                  {% if user.userprofile.email_consent %}checked{% endif %}
+                  onchange="this.form.submit()">
+            <label class="form-check-label" for="emailConsent">
               Recevoir des recommandations d’événements par email
-          </label>
-      </div>
-    </form>
-    <button type="submit" class="btn btn-success w-100">Mettre à jour le profil</button>
-  </form>
+            </label>
+          </div>
+        </form>
+
+        <button type="submit" class="btn btn-update mt-3">Mettre à jour le profil</button>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -73,20 +160,24 @@ const criteria = {
   symbol: document.getElementById("symbol")
 };
 
-password?.addEventListener("input", () => {
-  const val = password.value;
-  const conditions = {
-    length: val.length >= 8,
-    lower: /[a-z]/.test(val),
-    upper: /[A-Z]/.test(val),
-    number: /\d/.test(val),
-    symbol: /[^A-Za-z0-9]/.test(val)
-  };
+if (password) {
+  password.addEventListener("input", () => {
+    const val = password.value;
+    const checks = {
+      length: val.length >= 8,
+      lower: /[a-z]/.test(val),
+      upper: /[A-Z]/.test(val),
+      number: /\d/.test(val),
+      symbol: /[^A-Za-z0-9]/.test(val)
+    };
 
-  Object.entries(conditions).forEach(([key, valid]) => {
-    criteria[key].textContent = `${valid ? '✅' : '❌'} ${criteria[key].textContent.slice(2)}`;
-    criteria[key].className = valid ? 'text-success' : 'text-danger';
+    for (let key in checks) {
+      const el = criteria[key];
+      const isValid = checks[key];
+      el.textContent = (isValid ? "✅" : "❌") + el.textContent.substring(1);
+      el.className = isValid ? "text-success" : "text-danger";
+    }
   });
-});
+}
 </script>
 {% endblock %}

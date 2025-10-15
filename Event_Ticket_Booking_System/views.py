@@ -989,10 +989,10 @@ def download_ticket_pdf(request, reservation_id):
     elements.append(Spacer(1, 0.5 * cm))
 
     data = [
-        ['Location', reservation.event.location],
+        ['Lieu', reservation.event.location],
         ['Date', reservation.event.date.strftime('%B %d, %Y')],
-        ['Tickets', str(reservation.quantity)],
-        ['Paid', f"${reservation.total_price:.2f}"]
+        ['Billets', str(reservation.quantity)],
+        ['Payé', f"${reservation.total_price:.2f}"]
     ]
 
     if reservation.signature:
@@ -1000,7 +1000,7 @@ def download_ticket_pdf(request, reservation_id):
 
     table = Table(data, colWidths=[4 * cm, doc.width - 4 * cm])
     table.setStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e0e0e0')),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ffffff')),
         ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#555')),
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#aaa')),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
