@@ -17,7 +17,7 @@ from django.db.models import Q, Sum, F, Count, ExpressionWrapper, DecimalField
 from django.core.paginator import Paginator
 from django.conf import settings
 from decimal import Decimal
-
+from django.urls import reverse
 from user_service.models import UserProfile
 from django.contrib.auth.models import User
 from event_service.models import Event, Reservation
@@ -312,12 +312,17 @@ def event_secure_detail(request, secure_token, event_id):
         reservations = Reservation.objects.none()
 
     # Préparer les données selon le rôle
+
+    total_tickets = reservations.aggregate(total=Sum('quantity'))['total'] or 0
+
     context = {
         'event': event,
         'is_organizer': is_organizer,
         'is_ambassador': is_ambassador,
         'reservations': reservations,
-        "secure_token": secure_token
+        "secure_token": secure_token,
+        "total_tickets": total_tickets,
+
     }
 
     # Si organisateur : ajouter les données pour les modals
@@ -413,7 +418,6 @@ def event_secure_detail(request, secure_token, event_id):
 
 
 @login_required
-# views.py
 def add_ambassador_to_event(request, secure_token, event_id, user_id):
     profile = get_object_or_404(UserProfile, secure_token=secure_token)
     if request.user != profile.user or profile.role != "organizer":
@@ -824,14 +828,78 @@ def book_ticket_view(request, event_id):
         profile.total_tickets_reserved += qty
         profile.save()
 
+        print(event)
+
         request.session['reservation_id'] = reservation.id
+
+        # Send verification mail. Handle any exception that could occur.
+        try:
+            """Send reservation confirmation mail"""
+            from_email = settings.DEFAULT_FROM_EMAIL
+            mail_subject = "Reservation Confirmation"
+            to_email = user.email
+
+
+            # user = user,
+            # event = event,
+            # quantity = qty,
+            # total_price = total,
+            # ambassador = ambassador,
+
+            msge = render_to_string(
+                "email/confirm_book_email.txt",
+                {
+                    "user": user.email,
+                    "event": event,
+                    "quantity": qty,
+                    "total_price": total,
+                    "title": event.title,
+                    "location": event.location,
+                    "date": event.date,
+                    "price": event.ticket_price,
+                },
+            )
+
+            msge_html = render_to_string(
+                "email/confirm_book_email.html",
+                {
+                    "user": user.email,
+                    "event": event,
+                    "quantity": qty,
+                    "total_price": total,
+                    "title": event.title,
+                    "location": event.location,
+                    "date": event.date,
+                    "price": event.ticket_price,
+                },
+            )
+            send_mail(
+                mail_subject,
+                msge,
+                from_email,
+                [to_email, ],
+                fail_silently=False,
+                html_message=msge_html,
+            )
+            logger.info(f"Reservation Confirmation for {to_email}")
+
+        except Exception as e:
+            print(e)
+            msg = "Error sending the confirmation message"
+            messages.error(request, msg)
+            logger.error(f"Error sending the confirmation message: {e}")
+
         try:
             send_recommendation_email_to_user(request.user, event)
         except Exception as e:
             # Ne pas bloquer la réservation si l’email échoue
             print(f"Erreur envoi email recommandation : {e}")
         # === 8. Rediriger vers succès ===
-        request.session['booking_message'] = f"🎉 Vous avez réservé {qty} billet(s) pour \"{event.title}\" !"
+
+        print(event)
+        title = event.title
+
+        request.session['booking_message'] = f"🎉 Vous avez réservé {qty} billet(s) pour {title} !"
         return redirect('booking-success')
 
     # Si ce n'est pas POST, rediriger vers la page publique
@@ -942,23 +1010,20 @@ def delete_reservation(request, reservation_id):
     return render(request, '404.html', status=404)
 
 
-
-
-
-
-
-
 @login_required
 def download_ticket_pdf(request, reservation_id):
     reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
     buffer = io.BytesIO()
 
+    # === Police ===
+    font_name = "Helvetica"
     try:
         font_path = os.path.join(settings.BASE_DIR, 'static/fonts/DejaVuSans.ttf')
-        pdfmetrics.registerFont(TTFont("DejaVu", font_path))
-        font_name = "DejaVu"
+        if os.path.exists(font_path):
+            pdfmetrics.registerFont(TTFont("DejaVu", font_path))
+            font_name = "DejaVu"
     except:
-        font_name = "Helvetica"
+        pass
 
     doc = SimpleDocTemplate(
         buffer, pagesize=A5,
@@ -966,125 +1031,343 @@ def download_ticket_pdf(request, reservation_id):
         topMargin=2 * cm, bottomMargin=2 * cm
     )
 
-    frame = Frame(
-        doc.leftMargin, doc.bottomMargin,
-        doc.width, doc.height,
-        showBoundary=0
-    )
+    frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, showBoundary=0)
 
     def draw_background_and_footer(canvas, doc):
         width, height = A5
-        canvas.setFillColorRGB(0.9, 0.9, 1)
+        canvas.setFillColorRGB(0.98, 0.98, 0.98)
         canvas.rect(0, 0, width, height, stroke=0, fill=1)
-        canvas.setFillColorRGB(0.8, 0.8, 1)
+        canvas.setFillColorRGB(0.95, 0.95, 1)
         canvas.roundRect(1 * cm, 1 * cm, width - 2 * cm, height - 2 * cm, 10, stroke=0, fill=1)
         canvas.saveState()
-        canvas.setFont("Helvetica", 40)
-        canvas.setFillColorRGB(0.7, 0.7, 0.7, alpha=0.2)
+        canvas.setFont("Helvetica", 36)
+        canvas.setFillColorRGB(0.85, 0.85, 0.95)
         canvas.translate(width / 2, height / 2)
         canvas.rotate(45)
-        canvas.drawCentredString(0, 0, "EVENT TICKET")
+        canvas.drawCentredString(0, 0, "TICKET")
         canvas.restoreState()
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        canvas.saveState()
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
         canvas.setFont(font_name, 8)
-        canvas.setFillColor(colors.HexColor("#333"))
+        canvas.setFillColor(colors.HexColor("#666"))
         canvas.drawRightString(width - doc.rightMargin, 0.7 * cm, f"Printed: {timestamp}")
-        canvas.restoreState()
 
     template = PageTemplate(id='TicketTemplate', frames=[frame], onPage=draw_background_and_footer)
     doc.addPageTemplates([template])
 
     styles = getSampleStyleSheet()
-
     title_style = ParagraphStyle(
         'Title', parent=styles['Heading1'],
         fontName=font_name, fontSize=20,
         textColor=colors.HexColor('#1a237e'),
         alignment=1, spaceAfter=0.3 * cm
     )
-
     user_style = ParagraphStyle(
         'User', parent=styles['Normal'],
         fontName=font_name, fontSize=12,
-        textColor=colors.HexColor('#333'),
-        alignment=1, spaceAfter=0.5 * cm
+        textColor=colors.HexColor('#222'),
+        alignment=1, spaceAfter=0.4 * cm
     )
-
     note_style = ParagraphStyle(
         'Note', parent=styles['Normal'],
         fontName=font_name, fontSize=9,
         textColor=colors.HexColor('#555'),
         alignment=1, spaceBefore=0.5 * cm
     )
-
     secret_style = ParagraphStyle(
         'Secret', parent=styles['Normal'],
         fontName=font_name, fontSize=8,
-        textColor=colors.HexColor('#B0B0B0'),
+        textColor=colors.HexColor('#888'),
         alignment=1, spaceBefore=0.2 * cm
     )
 
     elements = []
 
-    logo_path = os.path.join(settings.BASE_DIR, 'static/images/logo.png')
-    if os.path.exists(logo_path):
-        logo = Image(logo_path, width=3 * cm, height=3 * cm)
-        logo.hAlign = 'CENTER'
-        elements.append(logo)
+    # === 1. Titre "SmartEventAI" au lieu du logo ===
+    smart_title = ParagraphStyle(
+        'SmartTitle', parent=styles['Heading2'],
+        fontName=font_name, fontSize=16,
+        textColor=colors.HexColor('#1a237e'),
+        alignment=1, spaceAfter=0.3 * cm
+    )
+    elements.append(Paragraph("SmartEventAI", smart_title))
+    elements.append(Spacer(1, 0.2 * cm))
 
-    elements.append(Spacer(1, 0.5 * cm))
+    # === 2. Image de couverture (réduite) ===
+    if reservation.event.cover_image:
+        cover_path = reservation.event.cover_image.path
+        if os.path.exists(cover_path):
+            try:
+                # Hauteur réduite à 3 cm pour tenir sur une page
+                cover_img = Image(cover_path, width=doc.width, height=3 * cm)
+                cover_img.hAlign = 'CENTER'
+                elements.append(cover_img)
+                elements.append(Spacer(1, 0.3 * cm))
+            except:
+                pass
 
+    # === 3. Titre de l'événement ===
     elements.append(Paragraph(reservation.event.title, title_style))
 
+    # === 4. Infos utilisateur ===
+    user = request.user
+    full_name = f"{user.first_name} {user.last_name}".strip()
+    display_name = full_name if full_name != "" else user.username
+    elements.append(Paragraph(f"Participant: {display_name}", user_style))
+    if user.email:
+        elements.append(Paragraph(f"Email: {user.email}", user_style))
 
-    elements.append(Paragraph(f"User: {request.user.username}", user_style))
+    elements.append(Spacer(1, 0.3 * cm))
 
-    elements.append(Spacer(1, 0.5 * cm))
-
+    # === 5. Tableau ===
     data = [
-        ['Lieu', reservation.event.location],
-        ['Date', reservation.event.date.strftime('%B %d, %Y')],
+        ['Lieu', str(reservation.event.location)],
+        ['Date', reservation.event.date.strftime('%A, %B %d, %Y')],
         ['Billets', str(reservation.quantity)],
-        ['Payé', f"${reservation.total_price:.2f}"]
+        ['Total', f"${reservation.total_price:.2f}"]
     ]
 
-    if reservation.signature:
-        data.append(['Code', reservation.signature])
+    if reservation.ambassador:
+        data.append(['Ambassadeur', reservation.ambassador.get_full_name() or reservation.ambassador.username])
 
     table = Table(data, colWidths=[4 * cm, doc.width - 4 * cm])
     table.setStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ffffff')),
-        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#555')),
-        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#aaa')),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.white),
+        ('BOX', (0, 0), (-1, -1), 0.8, colors.HexColor('#4a5568')),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e0')),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONT', (0, 0), (-1, -1), font_name),
+        ('FONTNAME', (0, 0), (-1, -1), font_name),
         ('FONTSIZE', (0, 0), (-1, -1), 11),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#333')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#2d3748')),
     ])
     elements.append(table)
 
-    elements.append(Spacer(1, 0.7 * cm))
+    elements.append(Spacer(1, 0.5 * cm))
 
-    qr = qrcode.make(f"ID:{reservation.id}|KEY:{reservation.secret_key}|USER:{request.user.username}")
+    # === 6. QR Code avec URL locale ===
+    server_ip = settings.IP_ADDRESS
+    port = "8000"
+    verify_url = f"http://{server_ip}:{port}{reverse('verify-ticket', kwargs={'secret_key': reservation.secret_key})}"
 
+    qr = qrcode.make(verify_url)
     qr_buf = io.BytesIO()
     qr.save(qr_buf, format='PNG')
     qr_buf.seek(0)
-    qr_img = Image(qr_buf, width=5 * cm, height=5 * cm)
+    qr_img = Image(qr_buf, width=4 * cm, height=4 * cm)  # un peu plus petit
     qr_img.hAlign = 'CENTER'
     elements.append(qr_img)
 
-    elements.append(Paragraph(reservation.secret_key, secret_style))
+    elements.append(Paragraph(f"Clé : {reservation.secret_key}", secret_style))
 
-    note = "Ce billet ne donne droit qu'à une seule entrée. Présentez-le à l'entrée."
-    elements.append(Paragraph(note, note_style))
-
+    # === Générer ===
     doc.build(elements)
     buffer.seek(0)
 
-    fname = f"{reservation.event.title}_{request.user.username}_ticket.pdf".replace(' ', '_')
+    event_title = "".join(c for c in reservation.event.title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+    fname = f"ticket_{event_title}_{user.username}.pdf".replace(' ', '_')
     return FileResponse(buffer, as_attachment=True, filename=fname)
+
+
+# @login_required
+# def download_ticket_pdf(request, reservation_id):
+#     reservation = get_object_or_404(Reservation, id=reservation_id, user=request.user)
+#     buffer = io.BytesIO()
+#
+#     try:
+#         font_path = os.path.join(settings.BASE_DIR, 'static/fonts/DejaVuSans.ttf')
+#         pdfmetrics.registerFont(TTFont("DejaVu", font_path))
+#         font_name = "DejaVu"
+#     except:
+#         font_name = "Helvetica"
+#
+#     doc = SimpleDocTemplate(
+#         buffer, pagesize=A5,
+#         leftMargin=1.5 * cm, rightMargin=1.5 * cm,
+#         topMargin=2 * cm, bottomMargin=2 * cm
+#     )
+#
+#     frame = Frame(
+#         doc.leftMargin, doc.bottomMargin,
+#         doc.width, doc.height,
+#         showBoundary=0
+#     )
+#
+#     def draw_background_and_footer(canvas, doc):
+#         width, height = A5
+#         canvas.setFillColorRGB(0.9, 0.9, 1)
+#         canvas.rect(0, 0, width, height, stroke=0, fill=1)
+#         canvas.setFillColorRGB(0.8, 0.8, 1)
+#         canvas.roundRect(1 * cm, 1 * cm, width - 2 * cm, height - 2 * cm, 10, stroke=0, fill=1)
+#         canvas.saveState()
+#         canvas.setFont("Helvetica", 40)
+#         canvas.setFillColorRGB(0.7, 0.7, 0.7, alpha=0.2)
+#         canvas.translate(width / 2, height / 2)
+#         canvas.rotate(45)
+#         canvas.drawCentredString(0, 0, "EVENT TICKET")
+#         canvas.restoreState()
+#         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#         canvas.saveState()
+#         canvas.setFont(font_name, 8)
+#         canvas.setFillColor(colors.HexColor("#333"))
+#         canvas.drawRightString(width - doc.rightMargin, 0.7 * cm, f"Printed: {timestamp}")
+#         canvas.restoreState()
+#
+#     template = PageTemplate(id='TicketTemplate', frames=[frame], onPage=draw_background_and_footer)
+#     doc.addPageTemplates([template])
+#
+#     styles = getSampleStyleSheet()
+#
+#     title_style = ParagraphStyle(
+#         'Title', parent=styles['Heading1'],
+#         fontName=font_name, fontSize=20,
+#         textColor=colors.HexColor('#1a237e'),
+#         alignment=1, spaceAfter=0.3 * cm
+#     )
+#
+#     user_style = ParagraphStyle(
+#         'User', parent=styles['Normal'],
+#         fontName=font_name, fontSize=12,
+#         textColor=colors.HexColor('#333'),
+#         alignment=1, spaceAfter=0.5 * cm
+#     )
+#
+#     note_style = ParagraphStyle(
+#         'Note', parent=styles['Normal'],
+#         fontName=font_name, fontSize=9,
+#         textColor=colors.HexColor('#555'),
+#         alignment=1, spaceBefore=0.5 * cm
+#     )
+#
+#     secret_style = ParagraphStyle(
+#         'Secret', parent=styles['Normal'],
+#         fontName=font_name, fontSize=8,
+#         textColor=colors.HexColor('#B0B0B0'),
+#         alignment=1, spaceBefore=0.2 * cm
+#     )
+#
+#     elements = []
+#
+#     logo_path = os.path.join(settings.BASE_DIR, 'static/images/logo.png')
+#     if os.path.exists(logo_path):
+#         logo = Image(logo_path, width=3 * cm, height=3 * cm)
+#         logo.hAlign = 'CENTER'
+#         elements.append(logo)
+#
+#     elements.append(Spacer(1, 0.5 * cm))
+#
+#     elements.append(Paragraph(reservation.event.title, title_style))
+#
+#
+#     elements.append(Paragraph(f"User: {request.user.username}", user_style))
+#
+#     elements.append(Spacer(1, 0.5 * cm))
+#
+#     data = [
+#         ['Lieu', reservation.event.location],
+#         ['Date', reservation.event.date.strftime('%B %d, %Y')],
+#         ['Billets', str(reservation.quantity)],
+#         ['Payé', f"${reservation.total_price:.2f}"]
+#     ]
+#
+#     if reservation.signature:
+#         data.append(['Code', reservation.signature])
+#
+#     table = Table(data, colWidths=[4 * cm, doc.width - 4 * cm])
+#     table.setStyle([
+#         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ffffff')),
+#         ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#555')),
+#         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#aaa')),
+#         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+#         ('FONT', (0, 0), (-1, -1), font_name),
+#         ('FONTSIZE', (0, 0), (-1, -1), 11),
+#         ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#333')),
+#     ])
+#     elements.append(table)
+#
+#     elements.append(Spacer(1, 0.7 * cm))
+#
+#     qr = qrcode.make(f"ID:{reservation.id}|KEY:{reservation.secret_key}|USER:{request.user.username}")
+#
+#     qr_buf = io.BytesIO()
+#     qr.save(qr_buf, format='PNG')
+#     qr_buf.seek(0)
+#     qr_img = Image(qr_buf, width=5 * cm, height=5 * cm)
+#     qr_img.hAlign = 'CENTER'
+#     elements.append(qr_img)
+#
+#     elements.append(Paragraph(reservation.secret_key, secret_style))
+#
+#     note = "Ce billet ne donne droit qu'à une seule entrée. Présentez-le à l'entrée."
+#     elements.append(Paragraph(note, note_style))
+#
+#     doc.build(elements)
+#     buffer.seek(0)
+#
+#     fname = f"{reservation.event.title}_{request.user.username}_ticket.pdf".replace(' ', '_')
+#     return FileResponse(buffer, as_attachment=True, filename=fname)
+#
+
+import csv
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def export_reservations_csv(request, secure_token, event_id):
+    # Vérifier les droits (même logique que event_secure_detail)
+    profile = get_object_or_404(UserProfile, secure_token=secure_token)
+    if request.user != profile.user or profile.role != 'organizer':
+        return render(request, 'access_denied.html', status=403)
+
+    event = get_object_or_404(Event, id=event_id, organizer=request.user)
+
+    # Récupérer toutes les réservations
+    reservations = event.reservation_set.select_related('user', 'ambassador').all()
+
+    # Créer la réponse CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="reservations_{event.title.replace(" ", "_")}_{event.id}.csv"'
+
+    writer = csv.writer(response)
+    # En-têtes
+    writer.writerow([
+        'Nom complet',
+        'Email',
+        'Username',
+        'Nombre de billets',
+        'Total payé ($)',
+        'Date de réservation',
+        'Ambassador',
+        'ID réservation',
+        'Clé secrète'
+    ])
+
+    # Données
+    for r in reservations:
+        ambassador = r.ambassador.get_full_name() if r.ambassador else '—'
+        writer.writerow([
+            r.user.get_full_name() or f"{r.user.first_name} {r.user.last_name}".strip() or r.user.username,
+            r.user.email,
+            r.user.username,
+            r.quantity,
+            f"{r.total_price:.2f}",
+            r.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            ambassador,
+            r.id,
+            r.secret_key
+        ])
+
+    return response
+
+
+def verify_ticket_view(request, secret_key):
+    reservation = get_object_or_404(Reservation, secret_key=secret_key)
+
+    context = {
+        'reservation': reservation,
+        'event': reservation.event,
+        'user': reservation.user,
+    }
+    return render(request, 'verify_ticket.html', context)
 
 
 

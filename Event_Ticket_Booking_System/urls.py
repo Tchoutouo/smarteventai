@@ -23,6 +23,8 @@ from Event_Ticket_Booking_System.views import (
     event_secure_detail,
     event_public_detail,
 complete_pending_reservation,
+verify_ticket_view,
+export_reservations_csv,
 )
 from user_service.views import (
     register_view,
@@ -62,12 +64,17 @@ urlpatterns = [
     path('events/<int:event_id>/', event_detail_view, name='event-detail'),
     path('event/<int:event_id>/', event_public_detail, name='event_public_detail'),
     path('event/secured/<str:secure_token>/<int:event_id>/', event_secure_detail, name='event_secure_detail'),
-path('reservation/complete/', complete_pending_reservation, name='complete-pending-reservation'),
+    path('reservation/complete/', complete_pending_reservation, name='complete-pending-reservation'),
+    path('verify-ticket/<str:secret_key>/', verify_ticket_view, name='verify-ticket'),
 
     # Auth
     path('register/', register_view, name='register'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
+
+    path('event/<str:secure_token>/<int:event_id>/export-reservations/',
+     export_reservations_csv,
+     name='export-reservations-csv'),
 
     # User
     path('profile/', profile_view, name='profile'),

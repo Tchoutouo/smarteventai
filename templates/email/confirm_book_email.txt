@@ -1,0 +1,19 @@
+{% autoescape off %}
+Bonjour {{ user }}!
+
+Votre reservation a bien été enregistrée.
+
+Détails:
+
+Titre: {{ title }}
+Lieu: {{ location }}
+Date: {{ date }}
+Prix unitaire: {{ price }}
+Nombre de tickets: {{ quantity }}
+Total: {{ total_price }}
+
+Cordialement,
+L’équipe SmartEventAi
+
+------------------------------------------
+{% endautoescape %}

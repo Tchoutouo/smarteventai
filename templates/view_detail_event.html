@@ -110,11 +110,72 @@
       </div>
     </div>
 
+  <!-- === Section: Liste des réservations === -->
+<div class="card mt-4">
+  <!-- view_detail_event.html -->
+  <div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        {% if is_organizer %}
+        📋 Toutes les réservations ({{ reservations|length }})
+      {% else %}
+        📋 Vos réservations ({{ reservations|length }})
+      {% endif %}
+      </h5>
+      <!-- Bouton d'export -->
+      <a href="{% url 'export-reservations-csv' secure_token event.id %}"
+         class="btn btn-sm btn-outline-light">
+        📥 Exporter en CSV
+      </a>
+    </div>
+    <div class="card-body">
+      <!-- Stats globales -->
+      <p><strong>Total réservations :</strong> {{ total_reservations }}</p>
+      <p><strong>Total billets :</strong> {{ total_tickets }}</p>
+      <p><strong>Revenu total :</strong> ${{ total_revenue|floatformat:2 }}</p>
+
+      <!-- Liste des réservations -->
+      <div class="mt-4">
+        <h6>📋 Liste des réservations ({{ reservations|length }})</h6>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm">
+            <thead class="table-light">
+              <tr>
+                <th>Participant</th>
+                <th>Email</th>
+                <th>Billets</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Ambassador</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for resa in reservations %}
+                <tr>
+                  <td>{{ resa.user.get_full_name|default:resa.user.username }}</td>
+                  <td>{{ resa.user.email }}</td>
+                  <td>{{ resa.quantity }}</td>
+                  <td>${{ resa.total_price }}</td>
+                  <td>{{ resa.created_at|date:"Y-m-d H:i" }}</td>
+                  <td>
+                    {% if resa.ambassador %}
+                      {{ resa.ambassador.get_full_name|default:resa.ambassador.username }}
+                    {% else %}
+                      <span class="text-muted">—</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
   {% elif is_ambassador %}
-    <div class="alert alert-success">
-      🤝 Vous êtes ambassadeur pour cet événement.
-    </div>
 
     <!-- Stats ambassadeur (optionnel) -->
     <div class="card">
@@ -125,6 +186,49 @@
         <p>Revenu attribué : <strong>${{ ambassador_revenue|floatformat:2 }}</strong></p>
       </div>
     </div>
+
+  <div class="card mt-4">
+  <!-- view_detail_event.html -->
+  <div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        📋 Toutes les réservations
+      </h5>
+    </div>
+    <div class="card-body">
+      <!-- Liste des réservations -->
+      <div class="mt-4">
+        <h6>📋 Liste des réservations ({{ reservations|length }})</h6>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm">
+            <thead class="table-light">
+              <tr>
+                <th>Participant</th>
+                <th>Email</th>
+                <th>Billets</th>
+                <th>Total</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for resa in reservations %}
+                <tr>
+                  <td>{{ resa.user.get_full_name|default:resa.user.username }}</td>
+                  <td>{{ resa.user.email }}</td>
+                  <td>{{ resa.quantity }}</td>
+                  <td>${{ resa.total_price }}</td>
+                  <td>{{ resa.created_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
     
   {% endif %}

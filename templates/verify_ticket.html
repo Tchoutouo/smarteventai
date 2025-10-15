@@ -1,0 +1,143 @@
+<!-- templates/verify_ticket.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ticket Validation - {{ event.title }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .ticket-card {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      background: white;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .header-bg {
+      background: linear-gradient(to right, #1a237e, #3949ab);
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+    }
+    .content-section {
+      padding: 30px;
+    }
+    .event-image {
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .logo {
+      height: 60px;
+      margin-bottom: 15px;
+    }
+    .qr-placeholder {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 12px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6c757d;
+    }
+    .info-row {
+      margin-bottom: 12px;
+    }
+    .label {
+      font-weight: 600;
+      color: #1a237e;
+      width: 120px;
+      display: inline-block;
+    }
+    .value {
+      color: #495057;
+    }
+    .status-valid {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket-card">
+    <!-- En-tête avec logo -->
+    <div class="header-bg">
+      <h2>🎟️ Ticket Validé</h2>
+      <p class="mb-0">Présentez ce ticket à l'entrée</p>
+    </div>
+
+    <div class="content-section">
+      <div class="row mb-4">
+        <!-- Logo de la plateforme (à gauche) -->
+
+        <!-- Image de couverture de l'événement (à droite) -->
+        <div class="col-md-9">
+          {% if event.cover_image %}
+            <img src="{{ event.cover_image.url }}" alt="{{ event.title }}" class="event-image w-100">
+          {% else %}
+            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px; border-radius: 12px;">
+              <span class="text-muted">Pas d'image</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Infos de la réservation -->
+      <h4 class="mb-3">Détails de la réservation</h4>
+
+      <div class="info-row">
+        <span class="label">Événement :</span>
+        <span class="value">{{ event.title }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Participant :</span>
+        <span class="value">
+          {{ user.get_full_name|default:user.username }}
+          {% if user.email %} ({{ user.email }}){% endif %}
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="label">Date :</span>
+        <span class="value">{{ event.date|date:"l, d F Y" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Lieu :</span>
+        <span class="value">{{ event.location }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Billets :</span>
+        <span class="value">{{ reservation.quantity }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Total :</span>
+        <span class="value">${{ reservation.total_price }}</span>
+      </div>
+
+      {% if reservation.ambassador %}
+        <div class="info-row">
+          <span class="label">Ambassadeur :</span>
+          <span class="value">{{ reservation.ambassador.get_full_name|default:reservation.ambassador.username }}</span>
+        </div>
+      {% endif %}
+
+      <div class="status-valid">✅ TICKET VALIDE</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
