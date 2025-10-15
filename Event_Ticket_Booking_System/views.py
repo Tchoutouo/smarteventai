@@ -260,7 +260,7 @@ def event_public_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     print("event_public_detail")
     ref_id = request.GET.get('ref')
-    print(ref_id)
+    # print(ref_id)
 
     # print(ref_id)
     return render(request, 'event_public.html',
@@ -765,18 +765,8 @@ def book_ticket_view(request, event_id):
                 user.last_name = last_name
                 user.save()
 
-            # user = authenticate(request, username=email, password=password)
-            print(user)
-
         # if user:
             login(request, user)
-        # === 2. Connecter l'utilisateur s'il ne l'est pas déjà ===
-        # if not request.user.is_authenticated:
-        #     print(user)
-        #     print(request)
-        #     login(request, user)
-        #     request.session.set_expiry(3600)
-
 
         # === 3. Récupérer ou créer le profil ===
         profile, created = UserProfile.objects.get_or_create(
@@ -828,7 +818,7 @@ def book_ticket_view(request, event_id):
         profile.total_tickets_reserved += qty
         profile.save()
 
-        print(event)
+        # print(event)
 
         request.session['reservation_id'] = reservation.id
 
@@ -838,13 +828,6 @@ def book_ticket_view(request, event_id):
             from_email = settings.DEFAULT_FROM_EMAIL
             mail_subject = "Reservation Confirmation"
             to_email = user.email
-
-
-            # user = user,
-            # event = event,
-            # quantity = qty,
-            # total_price = total,
-            # ambassador = ambassador,
 
             msge = render_to_string(
                 "email/confirm_book_email.txt",
@@ -896,7 +879,6 @@ def book_ticket_view(request, event_id):
             print(f"Erreur envoi email recommandation : {e}")
         # === 8. Rediriger vers succès ===
 
-        print(event)
         title = event.title
 
         request.session['booking_message'] = f"🎉 Vous avez réservé {qty} billet(s) pour {title} !"
@@ -921,7 +903,7 @@ def booking_success_view(request):
 
     recommendations = get_recommendations_for_event(event, top_k=4)
 
-    print(event)
+    # print(event)
     return render(request, 'booking_success.html', {
         'reservation': reservation,
         'event': event,
