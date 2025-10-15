@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="alert alert-success mt-4">
+    ✅ Vous avez été désabonné avec succès.
+</div>
+<a href="{% url 'home' %}" class="btn btn-primary">Retour à l'accueil</a>
+{% endblock %}

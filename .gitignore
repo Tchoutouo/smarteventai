@@ -62,3 +62,17 @@ Thumbs.db
 
 #Dump files
 db.sqlite3
+
+# AI MODELS
+ai_service/models/*
+
+# Logs
+logs/*
+
+# cache files
+.cache
+*.pt
+*.bin
+*.zip
+*.gguf
+*.ckpt

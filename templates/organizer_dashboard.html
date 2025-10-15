@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Organizer Dashboard{% endblock %}
+{% block title %}Tableau de bord de l'organisateur{% endblock %}
 {% block content %}
 <div class="container my-5">
-  <h2 class="text-center text-primary mb-4">Organizer Dashboard</h2>
+  <h2 class="text-center text-primary mb-4">Tableau de bord de l'organisateur</h2>
 
 <div class="alert
   {% if is_morning %}
@@ -26,7 +26,7 @@
   <button class="btn btn-lg btn-outline-success px-4 py-2 rounded-pill fw-bold shadow-sm mt-3 mt-md-0"
         data-bs-toggle="modal" data-bs-target="#addEventModal"
         style="box-shadow: 0 0 10px 2px rgba(40, 167, 69, 0.7);">
-  ➕ Add Event
+  ➕ Ajouter un événement
 </button>
 
 </div>
@@ -36,28 +36,28 @@
     <div class="col">
       <div class="card p-3 shadow-sm border-0">
         <div class="fs-3">📅</div>
-        <h6>Events</h6>
+        <h6>Événements</h6>
         <p class="fw-bold text-success">{{ total_events }}</p>
       </div>
     </div>
     <div class="col">
       <div class="card p-3 shadow-sm border-0">
         <div class="fs-3">✅</div>
-        <h6>Active Tickets</h6>
+        <h6>Billets actifs</h6>
         <p class="fw-bold text-success">{{ active_tickets }}</p>
       </div>
     </div>
     <div class="col">
       <div class="card p-3 shadow-sm border-0">
         <div class="fs-3">❌</div>
-        <h6>Sold Out Tickets</h6>
+        <h6>Billets épuisés</h6>
         <p class="fw-bold text-danger">{{ sold_out_tickets }}</p>
       </div>
     </div>
     <div class="col">
       <div class="card p-3 shadow-sm border-0">
         <div class="fs-3">🎟</div>
-        <h6>Total Tickets Booked</h6>
+        <h6>Total de billets réservés</h6>
         <p class="fw-bold text-success">{{ total_tickets }}</p>
       </div>
     </div>
@@ -71,14 +71,14 @@
     <div class="col">
       <div class="card p-3 shadow-sm border-0">
         <div class="fs-3">🧾</div>
-        <h6>Platform Fee</h6>
+        <h6>Frais de plateforme</h6>
         <p class="fw-bold text-danger">${{ commission|floatformat:2 }}</p>
       </div>
     </div>
     <div class="col">
       <div class="card p-3 shadow-sm border-0">
         <div class="fs-3">📈</div>
-        <h6>Net Sales</h6>
+        <h6>Ventes nettes</h6>
         <p class="fw-bold text-success">${{ net_sales|floatformat:2 }}</p>
       </div>
     </div>
@@ -93,15 +93,15 @@
     <img src="{{ event.cover_image.url }}" class="card-img-top" style="height: 150px; object-fit: cover;" alt="{{ event.title }}">
   {% else %}
     <div class="bg-light text-center py-5">
-      <span class="text-muted">No cover</span>
+      <span class="text-muted">Pas de couverture</span>
     </div>
   {% endif %}
     
         <div class="position-absolute top-0 end-0 m-2">
           {% if event.available_tickets > 0 %}
-            <span class="badge bg-success">Active</span>
+            <span class="badge bg-success">Actif</span>
           {% else %}
-            <span class="badge bg-danger">Sold Out</span>
+            <span class="badge bg-danger">Épuisé</span>
           {% endif %}
         </div>
 
@@ -112,25 +112,25 @@
               <span>📅 Date:</span><span>{{ event.date }}</span>
             </li>
             <li class="list-group-item border-0 d-flex justify-content-between">
-              <span>🎟 Tickets Booked:</span><span>{{ event.ticket_count|default:0 }}</span>
+              <span>🎟 Billets réservés:</span><span>{{ event.ticket_count|default:0 }}</span>
             </li>
             <li class="list-group-item border-0 d-flex justify-content-between">
-              <span>🎫 Tickets Left:</span><span>{{ event.available_tickets }}</span>
+              <span>🎫 Billets restants:</span><span>{{ event.available_tickets }}</span>
             </li>
             <li class="list-group-item border-0 d-flex justify-content-between">
-              <span>💵 Price:</span><span>${{ event.ticket_price }}</span>
+              <span>💵 Prix:</span><span>${{ event.ticket_price }}</span>
             </li>
             <li class="list-group-item border-0 d-flex justify-content-between">
-              <span>💰 Event Revenue:</span><span>${{ event.event_revenue|floatformat:2 }}</span>
+              <span>💰 Revenus de l'événement:</span><span>${{ event.event_revenue|floatformat:2 }}</span>
             </li>
           </ul>
           <div class="d-grid gap-2">
             <a href="{% url 'event_secure_detail' secure_token event.id %}" class="btn btn-outline-primary rounded-pill">
               👁️ Détails
             </a>
-            <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editModal{{ event.id }}">✏️ Edit</button>
-            <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addAmbassadorModal{{ event.id }}">✏️ Add Ambassador</button>
-            <button class="btn btn-outline-danger rounded-pill delete-btn" data-id="{{ event.id }}" data-title="{{ event.title }}">🗑️ Delete</button>
+            <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editModal{{ event.id }}">✏️ Modifier</button>
+            <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addAmbassadorModal{{ event.id }}">✏️ Ajouter un ambassadeur</button>
+            <button class="btn btn-outline-danger rounded-pill delete-btn" data-id="{{ event.id }}" data-title="{{ event.title }}">🗑️ Supprimer</button>
           </div>
         </div>
       </div>
@@ -143,21 +143,21 @@
           <form method="POST" action="{% url 'edit_event' secure_token event.id %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal-header">
-              <h5 class="modal-title">Edit: {{ event.title }}</h5>
+              <h5 class="modal-title">Modifier: {{ event.title }}</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
               <div class="mb-3">
-                <label>Title</label><input type="text" name="title" class="form-control" value="{{ event.title }}" required></div>
+                <label>Titre</label><input type="text" name="title" class="form-control" value="{{ event.title }}" required></div>
               <div class="mb-3"><label>Description</label><textarea name="description" class="form-control" rows="3" required>{{ event.description }}</textarea></div>
               <div class="mb-3">
                 <label>Date</label>
                 <input type="date" name="date" class="form-control" value="{{ event.date|date:'Y-m-d' }}" min="{{ today }}" max="{{ max_date }}" required>
-                <small class="text-muted">Choose a date from today up to 3 years only.</small>
+                <small class="text-muted">Choisissez une date à partir d'aujourd'hui jusqu'à 3 ans seulement.</small>
               </div>
-              <div class="mb-3"><label>Location</label><input type="text" name="location" class="form-control" value="{{ event.location }}" required></div>
-              <div class="mb-3"><label>Ticket Price</label><input type="number" name="ticket_price" min="0" step="0.01" class="form-control" value="{{ event.ticket_price }}" required></div>
-              <div class="mb-3"><label>Available Tickets</label><input type="number" name="available_tickets" min="0" class="form-control" value="{{ event.available_tickets }}" required></div>
+              <div class="mb-3"><label>Lieu</label><input type="text" name="location" class="form-control" value="{{ event.location }}" required></div>
+              <div class="mb-3"><label>Prix ​​du billet</label><input type="number" name="ticket_price" min="0" step="0.01" class="form-control" value="{{ event.ticket_price }}" required></div>
+              <div class="mb-3"><label>Billets disponibles</label><input type="number" name="available_tickets" min="0" class="form-control" value="{{ event.available_tickets }}" required></div>
               <div class="mb-3">
                 <label class="form-label">Image de couverture</label>
                 <input type="file" name="cover_image" class="form-control" accept="image/*">
@@ -170,8 +170,8 @@
 
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-primary">Save</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
             </div>
           </form>
         </div>
@@ -268,12 +268,12 @@
       <form method="POST" action="{% url 'event-create' secure_token %}" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="modal-header">
-          <h5 class="modal-title">➕ Add New Event</h5>
+          <h5 class="modal-title">➕ Ajouter un nouvel événement</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
           <div class="mb-3">
-            <label>Title</label>
+            <label>Titre</label>
             <input type="text" name="title" class="form-control" required>
           </div>
           <div class="mb-3">
@@ -287,28 +287,28 @@
           <div class="mb-3">
             <label>Date</label>
             <input type="date" name="date" class="form-control" min="{{ today }}" max="{{ max_date }}" required>
-            <small class="text-muted">Choose a date from today up to 3 years only.</small>
+            <small class="text-muted">Choisissez une date à partir d'aujourd'hui jusqu'à 3 ans seulement.</small>
           </div>
           <div class="mb-3">
-            <label>Location</label>
+            <label>Lieu</label>
             <input type="text" name="location" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label>Ticket Price</label>
+            <label>Prix du billet</label>
             <input type="number" name="ticket_price" step="0.01" min="0" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label>Available Tickets</label>
+            <label>Billets disponibles</label>
             <input type="number" name="available_tickets" min="1" class="form-control" required>
           </div>
           <div class="mb-3">
-              <label class="form-label">Cover Image</label>
+              <label class="form-label">Image de couverture</label>
               <input type="file" name="cover_image" class="form-control" accept="image/*">
             </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success">Create</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-success">Créer</button>
         </div>
       </form>
     </div>

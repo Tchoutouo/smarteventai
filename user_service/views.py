@@ -1,5 +1,4 @@
 import re
-
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
@@ -9,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from user_service.models import UserProfile
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 import logging
 
@@ -192,7 +193,7 @@ def edit_profile_view(request):
         password = request.POST.get('password', '')
         confirm_password = request.POST.get('confirm_password', '')
         current_password = request.POST.get('current_password', '')
-
+        user.userprofile.email_consent = request.POST.get('email_consent') == 'on'
         user = request.user
 
         if not user.check_password(current_password):
@@ -224,3 +225,25 @@ def edit_profile_view(request):
         return redirect('profile')
 
     return render(request, 'edit_profile.html', {'user': request.user})
+
+
+@require_POST
+@login_required
+def toggle_email_consent(request):
+    profile = request.user.userprofile
+    profile.email_consent = not profile.email_consent
+    profile.save()
+    return redirect('profile')
+
+
+def unsubscribe_view(request):
+    user_id = request.GET.get('user')
+    if user_id and user_id.isdigit():
+        try:
+            profile = UserProfile.objects.get(user_id=int(user_id))
+            profile.email_consent = False
+            profile.save()
+            messages.success(request, "Vous avez été désabonné avec succès.")
+        except UserProfile.DoesNotExist:
+            messages.error(request, "Utilisateur introuvable.")
+    return render(request, 'unsubscribe_success.html')

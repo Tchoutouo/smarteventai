@@ -1,36 +1,39 @@
 {% extends 'base.html' %}
-{% block title %}Booking Success{% endblock %}
+
+{% load static %}
+
+{% block title %}Réservation réussie{% endblock %}
 
 {% block content %}
 
 <div class="container text-center my-5">
 
-  <h2 class="text-success animated-celebration">🎉 Booking successful! 🎉</h2>
+  <h2 class="text-success animated-celebration">🎉 Réservation réussie! 🎉</h2>
 
   <div id="confetti-container"></div>
 
   <div class="card mx-auto text-start shadow-sm" style="max-width: 500px;">
     <div class="card-body">
       <h4 class="card-title text-primary">{{ reservation.event.title }}</h4>
-      <p class="card-text mb-2"><strong>📍 Location:</strong> {{ reservation.event.location }}</p>
+      <p class="card-text mb-2"><strong>📍 Lieu:</strong> {{ reservation.event.location }}</p>
       <p class="card-text mb-2"><strong>📅 Date:</strong> {{ reservation.event.date }}</p>
       <hr>
-      <p class="card-text mb-2"><strong>🎫 Tickets Booked:</strong> {{ reservation.quantity }}</p>
-      <p class="card-text mb-2"><strong>💵 Total Amount Paid:</strong> ${{ reservation.total_price }}</p>
-      <p class="card-text"><strong>🧾 Reservation Code:</strong> {{ reservation.signature }}</p>
+      <p class="card-text mb-2"><strong>🎫 Billets réservés:</strong> {{ reservation.quantity }}</p>
+      <p class="card-text mb-2"><strong>💵 Montant total payé:</strong> ${{ reservation.total_price }}</p>
+      <p class="card-text"><strong>🧾 Code de réservation:</strong> {{ reservation.signature }}</p>
     </div>
   </div>
 
   <div class="mt-4">
     <a href="{% url 'my_tickets_attendee' request.user.userprofile.secure_token %}" class="btn btn-primary me-2">
-      View My Tickets
+      Voir mes billets
     </a>
     <a href="{% url 'home' %}" class="btn btn-secondary">
-      Back to Home
+      Retour à l'accueil
     </a>
   </div>
   <div class="mt-4 mb-5">
-    <a href="{% url 'download_ticket' reservation.id %}" class="btn btn-success">Download Ticket (PDF)</a>
+    <a href="{% url 'download_ticket' reservation.id %}" class="btn btn-success">Télécharger le billet (PDF)</a>
 
   </div>
     <!-- Après l'affichage de l'événement -->
@@ -46,7 +49,12 @@
         <div class="carousel-item active">
           <div class="card">
             <div class="card-body">
-              <h5>{{ evt.title }}</h5>
+              {% if evt.cover_image %}
+                <img src="{{ evt.cover_image.url }}" class="d-block w-100 rounded-4 mb-3" alt="{{ evt.title }}" style="height: 200px; object-fit: cover;">
+              {% else %}
+                <img src="{% static 'default_event.jpg' %}" class="d-block w-100 rounded-4 mb-3" alt="Image par défaut" style="height: 200px; object-fit: cover;">
+              {% endif %}
+              <!-- <h5>{{ evt.title }}</h5> -->
               <p class="text-muted">{{ evt.date|date:"d M Y" }} • {{ evt.location }}</p>
               <a href="{% url 'event_public_detail' evt.id %}" class="btn btn-sm btn-outline-primary">Voir</a>
             </div>

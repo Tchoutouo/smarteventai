@@ -3,41 +3,79 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>{% block title %}Event Ticket Booking{% endblock %}</title>
+  <title>{% block title %}Smart Event AI{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <style>
+    :root {
+      --primary-start: #667eea;
+      --primary-end: #764ba2;
+      --text-dark: #2d3748;
+      --text-light: #4a5568;
+      --bg-light: #f8fafc;
+    }
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+    .nav-link {
+      font-weight: 500;
+    }
+    .btn-warning {
+      background-color: #f6ad55;
+      border-color: #f6ad55;
+    }
+    .btn-warning:hover {
+      background-color: #ed8936;
+      border-color: #ed8936;
+    }
+    footer a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    footer a:hover {
+      color: white;
+      text-decoration: underline;
+    }
+    footer h5 {
+      color: white;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    .footer-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 1.5rem 0;
+    }
+  </style>
 </head>
+
 <body>
   <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-3">
+  <nav class="navbar navbar-expand-lg px-3" style="background: linear-gradient(135deg, var(--primary-start), var(--primary-end));">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/">🎟️ SmartEventAI</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <a class="navbar-brand text-white" href="/">🎟️ SmartEventAI</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-
-          {% if request.user.is_authenticated and request.user.userprofile.role == 'organizer' %}
-            <li class="nav-item">
-{#              <a href="{% url 'event-create' secure_token=request.user.userprofile.secure_token %}" class="nav-link">Create Event</a>#}
-            </li>
-          {% endif %}
+          <li class="nav-item"><a class="nav-link text-white" href="/">Accueil</a></li>
 
           {% if request.user.is_authenticated %}
             {% if request.user.userprofile.role == 'organizer' %}
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'organizer-dashboard' secure_token=request.user.userprofile.secure_token %}">Organizer Dashboard</a>
+                <a class="nav-link text-white" href="{% url 'organizer-dashboard' secure_token=request.user.userprofile.secure_token %}">Tableau de bord organisateur</a>
               </li>
             {% elif request.user.userprofile.role == 'ambassador' %}
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'ambassador-dashboard' secure_token=request.user.userprofile.secure_token %}">Ambassador Dashboard</a>
+                <a class="nav-link text-white" href="{% url 'ambassador-dashboard' secure_token=request.user.userprofile.secure_token %}">Tableau de bord ambassadeur</a>
               </li>
             {% elif request.user.is_superuser %}
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'supervisor-panel' %}">Supervisor Panel</a>
+                <a class="nav-link text-white" href="{% url 'supervisor-panel' %}">Superviseur</a>
               </li>
             {% endif %}
           {% endif %}
@@ -45,8 +83,8 @@
 
         <!-- SEARCH BAR -->
         <form class="d-flex me-3" method="get" action="/search/">
-          <input class="form-control me-2" type="search" name="q" placeholder="Search events..." aria-label="Search" />
-          <button class="btn btn-outline-light" type="submit">Search</button>
+          <input class="form-control me-2" type="search" name="q" placeholder="Rechercher des événements..." aria-label="Search" />
+          <button class="btn btn-outline-light" type="submit">Recherche</button>
         </form>
 
         <!-- USER MENU -->
@@ -54,34 +92,27 @@
           {% if request.user.is_authenticated %}
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                👤 {{ request.user.first_name }} ({{ request.user.userprofile.role|capfirst }})
+                👤 {{ request.user.first_name|default:request.user.username }} ({{ request.user.userprofile.role|capfirst }})
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{% url 'profile' %}">View Profile</a></li>
-                <li><a class="dropdown-item" href="{% url 'edit-profile' %}">Edit Profile</a></li>
-
+                <li><a class="dropdown-item" href="{% url 'profile' %}">Mon profil</a></li>
+                <li><a class="dropdown-item" href="{% url 'edit-profile' %}">Modifier le profil</a></li>
                 {% if request.user.userprofile.role == 'attendee' %}
-                  <li>
-                    <a class="dropdown-item" href="{% url 'payment-dashboard' secure_token=request.user.userprofile.secure_token %}">Payment Dashboard</a>
-                  </li>
+                  <li><a class="dropdown-item" href="{% url 'payment-dashboard' secure_token=request.user.userprofile.secure_token %}">Paiements</a></li>
                 {% endif %}
-
                 <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Logout</a></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Se déconnecter</a></li>
               </ul>
             </li>
 
             {% if request.user.userprofile.role == 'attendee' %}
-              <li class="nav-item">
-                <a href="{% url 'my_tickets_attendee' secure_token=request.user.userprofile.secure_token %}" class="btn btn-warning ms-2">🛒 My Tickets</a>
+              <li class="nav-item ms-2">
+                <a href="{% url 'my_tickets_attendee' secure_token=request.user.userprofile.secure_token %}" class="btn btn-warning">🛒 Mes Billets</a>
               </li>
             {% endif %}
           {% else %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
-            <li class="nav-item">
-              <span class="nav-link disabled text-white-50">👤 Not Yet Registered</span>
-            </li>
+            <li class="nav-item"><a class="nav-link text-white" href="{% url 'login' %}">Se connecter</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="{% url 'register' %}">S'inscrire</a></li>
           {% endif %}
         </ul>
       </div>
@@ -96,28 +127,235 @@
   <!-- FOOTER -->
   <footer class="bg-dark text-light mt-5 pt-4 pb-3">
     <div class="container">
-      <div class="row">
-        <div class="col-sm-6 col-md-4 mb-3">
-          <h5>About</h5>
-          <p>Event Ticket Booking is your trusted platform for discovering and organizing exciting events across the city.</p>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <h5>À propos de SmartEventAI</h5>
+          <p class="text-muted">
+            Votre plateforme intelligente pour découvrir, organiser et partager des événements uniques.
+          </p>
         </div>
-        <div class="col-sm-6 col-md-2 mb-3">
-          <h5>Explore</h5>
+        <div class="col-md-2">
+          <h5>Navigation</h5>
           <ul class="list-unstyled">
-            <li><a href="/" class="text-light">Home</a></li>
-            <li><a href="{% url 'login' %}" class="text-light">Login</a></li>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="{% url 'about' %}">À propos</a></li>
+            <li><a href="{% url 'complaint-form' %}">Contact</a></li>
           </ul>
         </div>
-
-        <div class="col-sm-6 col-md-3 text-md-end">
-          <h5>Contact</h5>
-          <p>&copy; 2025 SmartEventAI</p>
+        <div class="col-md-3">
+          <h5>Liens utiles</h5>
+          <ul class="list-unstyled">
+            {% if not request.user.is_authenticated %}
+              <li><a href="{% url 'login' %}">Connexion</a></li>
+              <li><a href="{% url 'register' %}">Inscription</a></li>
+            {% endif %}
+            <li><a href="#">Politique de confidentialité</a></li>
+          </ul>
         </div>
+        <div class="col-md-3 text-md-end">
+          <h5>Restons connectés</h5>
+          <p class="text-muted mb-1">© 2025 SmartEventAI</p>
+          <p class="text-muted small">Tous droits réservés</p>
+        </div>
+      </div>
+      <div class="footer-divider mt-4"></div>
+      <div class="text-center text-muted small">
+        Conçu avec ❤️ pour les passionnés d’événements
       </div>
     </div>
   </footer>
-
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{% static 'js/main.js' %}"></script>
+
+  <!-- SmartEventAI Chatbot Widget -->
+  <div id="chatbot-container" style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 360px;
+      max-width: 95vw;
+      z-index: 10000;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      border-radius: 16px;
+      overflow: hidden;
+      display: none;
+  ">
+    <div id="chat-header" style="
+        background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+        color: white;
+        padding: 14px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    ">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>💬</span>
+        <strong>Assistant SmartEventAI</strong>
+      </div>
+      <button id="chat-minimize" style="
+          background: rgba(255,255,255,0.2);
+          border: none;
+          color: white;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          font-size: 14px;
+          cursor: pointer;
+      ">−</button>
+    </div>
+    
+    <div id="chat-body" style="
+        height: 400px;
+        overflow-y: auto;
+        padding: 16px;
+        background: #f9f9ff;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    ">
+      <div style="color: #555; font-size: 14px;">
+        <strong>Bot :</strong> Bonjour ! Posez-moi une question sur les événements ou la plateforme.
+      </div>
+    </div>
+    
+    <div style="padding: 12px; background: white; border-top: 1px solid #eee;">
+      <input type="text" id="chat-input" placeholder="Tapez votre question..." style="
+          width: 100%;
+          padding: 10px 14px;
+          border: 1px solid #ddd;
+          border-radius: 24px;
+          outline: none;
+          font-size: 14px;
+          box-sizing: border-box;
+      " />
+    </div>
+  </div>
+
+  <button id="chat-toggle" style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+      z-index: 9999;
+  ">💬</button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('chat-toggle');
+      const container = document.getElementById('chatbot-container');
+      const minimizeBtn = document.getElementById('chat-minimize');
+      const body = document.getElementById('chat-body');
+      const input = document.getElementById('chat-input');
+
+      // Ajouter un loader
+      function showLoader() {
+        const loader = document.createElement('div');
+        loader.id = 'chat-loader';
+        loader.innerHTML = '<div style="text-align: center; padding: 10px;"><div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #667eea; border-radius: 50%; border-top: 3px solid transparent; animation: spin 1s linear infinite;"></div></div>';
+        body.appendChild(loader);
+        body.scrollTop = body.scrollHeight;
+        return loader;
+      }
+
+      function hideLoader(loader) {
+        if (loader && loader.parentNode) {
+          loader.remove();
+        }
+      }
+
+      // Animation CSS pour le spinner
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+
+      toggleBtn.onclick = () => {
+        container.style.display = 'block';
+        toggleBtn.style.display = 'none';
+        loadHistory();
+      };
+
+      minimizeBtn.onclick = () => {
+        container.style.display = 'none';
+        toggleBtn.style.display = 'block';
+      };
+
+      async function loadHistory() {
+        try {
+          const res = await fetch('/api/chat/history/', {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            body.innerHTML = '';
+            data.history.forEach(msg => {
+              const align = msg.role === 'user' ? 'flex-end' : 'flex-start';
+              const bg = msg.role === 'user' ? '#e0e0ff' : '#f0f0f0';
+              const color = msg.role === 'user' ? '#2c3e50' : '#27ae60';
+              body.innerHTML += `<div style="align-self: ${align}; max-width: 80%; background: ${bg}; padding: 10px; border-radius: ${msg.role === 'user' ? '18px 0 18px 18px' : '0 18px 18px 18px'}; font-size: 14px; color: ${color};">${msg.content}</div>`;
+            });
+            body.scrollTop = body.scrollHeight;
+          }
+        } catch (e) {
+          console.log("Pas d'historique");
+        }
+      }
+
+      input.onkeypress = async (e) => {
+        if (e.key === 'Enter') {
+          const question = input.value.trim();
+          if (!question) return;
+
+          // Afficher la question
+          body.innerHTML += `<div style="align-self: flex-end; max-width: 80%; background: #e0e0ff; padding: 10px; border-radius: 18px 0 18px 18px; font-size: 14px; color: #2c3e50;">${question}</div>`;
+          input.value = '';
+          body.scrollTop = body.scrollHeight;
+
+          // Afficher le loader
+          const loader = showLoader();
+
+          try {
+            const res = await fetch('/api/chat/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ question })
+            });
+
+            const data = await res.json();
+
+            // Masquer le loader
+            hideLoader(loader);
+
+            // Afficher la réponse
+            const answer = data.answer || "Je n'ai pas pu générer de réponse.";
+            body.innerHTML += `<div style="align-self: flex-start; max-width: 80%; background: #f0f0f0; padding: 10px; border-radius: 0 18px 18px 18px; font-size: 14px; color: #27ae60;">${answer}</div>`;
+            body.scrollTop = body.scrollHeight;
+
+          } catch (err) {
+            // Masquer le loader
+            hideLoader(loader);
+            body.innerHTML += `<div style="align-self: flex-start; max-width: 80%; background: #ffe0e0; padding: 10px; border-radius: 0 18px 18px 18px; font-size: 14px; color: red;">❌ Erreur de connexion.</div>`;
+            body.scrollTop = body.scrollHeight;
+          }
+        }
+      };
+    });
+  </script>
 </body>
 </html>

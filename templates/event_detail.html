@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Event Details{% endblock %}
+{% block title %}Détails de l'événement{% endblock %}
 {% load static %}
 
 {% block content %}
@@ -46,11 +46,11 @@
 <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
   <div class="w-100" style="max-width: 600px;">
 
-    <h2 class="text-primary mb-4 text-center">🎟 Book Tickets for "{{ event.title }}"</h2>
+    <h2 class="text-primary mb-4 text-center">🎟 Réserver des billets pour "{{ event.title }}"</h2>
 
     {% if event.available_tickets == 0 %}
       <div class="alert alert-warning d-flex align-items-center fade-slide-alert" role="alert">
-        <strong>❌ Tickets Unavailable:</strong>&nbsp; This event is fully booked.
+        <strong>❌ Billets indisponibles:</strong>&nbsp; Cet événement est complet.
       </div>
     {% endif %}
 
@@ -59,7 +59,7 @@
         <div class="progress mb-4" role="progressbar" aria-valuenow="{{ event.available_tickets }}" aria-valuemin="0" aria-valuemax="{{ event.total_tickets }}">
           <div class="progress-bar bg-success progress-animated"
                style="--bar-width: {{ percent }}%; width: 0%;">
-            {{ event.available_tickets }} tickets remaining
+            {{ event.available_tickets }} billets restants
           </div>
         </div>
       {% endwith %}
@@ -70,21 +70,21 @@
 
       <div class="mb-3">
         <div class="mb-3">
-          <label class="form-label">First Name</label>
+          <label class="form-label">Prénom</label>
           <input type="text" name="first_name" class="form-control" required value="{{ request.POST.first_name }}">
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Last Name</label>
+          <label class="form-label">Nom de famille</label>
           <input type="text" name="last_name" class="form-control" required value="{{ request.POST.last_name }}">
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Email</label>
+          <label class="form-label">E-mail</label>
           <input type="email" name="email" class="form-control" required value="{{ request.POST.email }}">
         </div>
 
-        <label for="quantity" class="form-label fw-bold">Number of Tickets:</label>
+        <label for="quantity" class="form-label fw-bold">Nombre de billets :</label>
         <input type="number" id="ticketQuantity" name="quantity"
                min="1"
                max="{{ event.available_tickets }}"
@@ -92,22 +92,22 @@
                class="form-control form-control-lg"
                placeholder="Enter quantity" required>
         <small class="text-muted d-block mt-1">
-          Available: {{ event.available_tickets }} | Price: $<span id="price">{{ event.ticket_price }}</span>
+          Disponibles: {{ event.available_tickets }} | Prix: $<span id="price">{{ event.ticket_price }}</span>
         </small>
 
         <input type="hidden" value="{{ ref_ambassador }}" name="ref">
       </div>
 
       <div class="mb-4">
-        <label class="form-label fw-bold text-success">💰 Final Payment Amount:</label>
+        <label class="form-label fw-bold text-success">💰 Montant final à payer :</label>
         <div class="form-control bg-light" id="finalAmount">$0.00</div>
       </div>
 
       {% if event.available_tickets > 0 %}
 <!--        <button type="submit" class="btn btn-primary w-100 btn-lg animated-button">✅ Confirm Booking</button>-->
-        <button type="submit" class="btn btn-primary w-100 btn-lg animated-button">✅ Reserver et S'inscrire</button>
+        <button type="submit" class="btn btn-primary w-100 btn-lg animated-button">✅ Réserver et S'inscrire</button>
       {% else %}
-        <button type="button" class="btn btn-secondary w-100 btn-lg" disabled>❌ Tickets Unavailable</button>
+        <button type="button" class="btn btn-secondary w-100 btn-lg" disabled>❌ Billets Indisponibles</button>
       {% endif %}
     </form>
 

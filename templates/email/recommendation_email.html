@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .recommendations {
+            margin: 25px 0;
+        }
+        .event-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s ease;
+        }
+        .event-card:hover {
+            transform: translateY(-2px);
+        }
+        .event-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .event-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+        }
+        .event-meta {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        .event-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s ease;
+        }
+        .event-link:hover {
+            background: #5a6ed0;
+        }
+        .footer {
+            background: #f1f1f1;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #7f8c8d;
+            border-top: 1px solid #ddd;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+            }
+            .content {
+                padding: 20px;
+            }
+            .event-image {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Découvrez des événements qui vous plairont !</h1>
+        </div>
+        <div class="content">
+            <p class="greeting">Bonjour {{ user.first_name|default:user.username }},</p>
+
+            <p>Merci d’avoir participé à « <strong>{{ last_event.title }}</strong> » !</p>
+
+            <p>Voici des événements similaires que vous pourriez aimer :</p>
+
+            <div class="recommendations">
+                {% for event in recommendations %}
+                    <div class="event-card">
+                        {% if event.cover_image %}
+                            <img src="{{ base_url }}{{ event.cover_image.url }}" alt="{{ event.title }}" class="event-image">
+                        {% else %}
+                            <img src="{{ base_url }}/static/images/default-event.jpg" alt="Image par défaut" class="event-image">
+                        {% endif %}
+                        <h3 class="event-title">{{ event.title }}</h3>
+                        <div class="event-meta">
+                            📅 {{ event.date|date:"d M Y" }} • 📍 {{ event.location }}
+                        </div>
+                        <a href="{{ base_url }}/event/{{ event.id }}/" class="event-link">Voir l'événement</a>
+                    </div>
+                {% empty %}
+                    <p>Aucune recommandation pour le moment.</p>
+                {% endfor %}
+            </div>
+
+            <p>👉 Réservez vite — les places sont limitées !</p>
+
+            <p><a href="{{ base_url }}" style="color: #667eea; text-decoration: none;">Visitez notre site</a></p>
+        </div>
+        <div class="footer">
+            © 2025 EventTicket. Tous droits réservés.<br>
+            <a href="{{ base_url }}/unsubscribe/?user={{ user.id }}">Se désabonner</a> | <a href="{{ base_url }}">Politique de confidentialité</a>
+        </div>
+    </div>
+</body>
+<!--<footer>
+<div class="container">
+    <a href="{{ base_url }}/unsubscribe/?user={{ user.id }}">Se désabonner</a>
+</div>
+</footer>-->
+</html>

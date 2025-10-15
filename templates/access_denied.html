@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Access Denied{% endblock %}
+{% block title %}Accès refusé{% endblock %}
 
 {% block content %}
 <style>
@@ -71,13 +71,13 @@
     loop autoplay>
   </lottie-player>
 
-  <h1>Access Denied</h1>
-  <p>Sorry, you don’t have permission to view this page.<br>Please login or return to the homepage.</p>
+  <h1>Accès refusé</h1>
+  <p>Désolé, vous n’avez pas la permission de voir cette page.<br>Veuillez vous connecter ou revenir à la page d'accueil.</p>
 
   {% if not request.user.is_authenticated %}
-    <a href="{% url 'login' %}" class="btn btn-glass me-2">🔑 Login</a>
+    <a href="{% url 'login' %}" class="btn btn-glass me-2">🔑 Connexion</a>
   {% else %}
-    <a href="{% url 'home' %}" class="btn btn-glass">🏠 Home</a>
+    <a href="{% url 'home' %}" class="btn btn-glass">🏠 Accueil</a>
   {% endif %}
 </div>
 {% endblock %}
