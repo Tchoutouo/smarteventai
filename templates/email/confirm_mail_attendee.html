@@ -1,389 +1,201 @@
 {% autoescape off %}
-
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="x-apple-disable-message-reformatting">
-<title>Account Registration</title>
-<style id="" media="all">/* latin-ext */
-@font-face {
-  font-family: 'Helvetica','Roboto';
-  font-style: normal;
-  font-weight: 300;
-}
-/* latin */
-@font-face {
-  font-family: 'Helvetica','Roboto';
-  font-style: normal;
-  font-weight: 300;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Helvetica','Roboto';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-/* latin */
-@font-face {
-  font-family: 'Helvetica','Roboto';
-  font-style: normal;
-  font-weight: 400;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Helvetica','Roboto';
-  font-style: normal;
-  font-weight: 700;
-}
-/* latin */
-@font-face {
-  font-family: 'Helvetica','Roboto';
-  font-style: normal;
-  font-weight: 700;
-}
-</style>
-
+<title>Création de votre compte</title>
 <style>
-html,
-body {
-    margin: 0 auto !important;
+/* Base */
+html, body {
+    margin: 0 !important;
     padding: 0 !important;
     height: 100% !important;
     width: 100% !important;
-    background: #f1f1f1;
+    background-color: #f5f5f5;
+    font-family: 'Helvetica', 'Roboto', Arial, sans-serif;
 }
 
 * {
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
-div[style*="margin: 16px 0"] {
-    margin: 0 !important;
-}
-
-table,
-td {
+table, td {
     mso-table-lspace: 0pt !important;
     mso-table-rspace: 0pt !important;
-}
-
-table {
-    border-spacing: 0 !important;
     border-collapse: collapse !important;
-    table-layout: fixed !important;
-    margin: 0 auto !important;
-}
-
-img {
-    -ms-interpolation-mode:bicubic;
 }
 
 a {
-    text-decoration: none !important;
+    color: #e2930c;
+    text-decoration: none;
 }
 
-*[x-apple-data-detectors],  /* iOS */
-.unstyle-auto-detected-links *,
-.aBn {
-    border-bottom: 0 !important;
-    cursor: default !important;
-    color: inherit !important;
-    text-decoration: none !important;
-    font-size: inherit !important;
-    font-family: inherit !important;
-    font-weight: inherit !important;
-    line-height: inherit !important;
+img {
+    border: 0;
+    height: auto;
+    line-height: 100%;
+    outline: none;
+    text-decoration: none;
 }
 
-.a6S {
-    display: none !important;
-    opacity: 0.01 !important;
+/* Container */
+.email-container {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
-.im {
-    color: inherit !important;
+/* Logo */
+.logo {
+    text-align: center;
+    padding: 24px 0;
+    background-color: #fafafa;
 }
 
-img.g-img + div {
-    display: none !important;
+.logo h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
 }
 
-/* iPhone 4, 4S, 5, 5S, 5C, and 5SE */
-@media only screen and (min-device-width: 320px) and (max-device-width: 374px) {
-    u ~ div .email-container {
-        min-width: 320px !important;
+/* Hero */
+.hero {
+    padding: 40px 30px;
+    text-align: center;
+    background-color: #ffffff;
+}
+
+.hero h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 16px;
+}
+
+.hero h4 {
+    font-size: 17px;
+    font-weight: 500;
+    color: #555;
+    margin: 0 0 24px;
+    line-height: 1.6;
+}
+
+/* Credentials box */
+.credentials {
+    background-color: #f9f9f9;
+    border-left: 4px solid #e2930c;
+    padding: 18px;
+    margin: 24px auto;
+    max-width: 500px;
+    text-align: left;
+    border-radius: 0 6px 6px 0;
+}
+
+.credentials p {
+    margin: 8px 0;
+    font-size: 15px;
+    color: #444;
+}
+
+.credentials strong {
+    color: #333;
+    font-weight: 600;
+}
+
+/* CTA Button */
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #e2930c;
+    color: #ffffff !important;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    background-color: #c97a00;
+}
+
+/* Footer message */
+.hero p.message {
+    font-size: 16px;
+    color: #666;
+    margin: 28px 0 0;
+    line-height: 1.7;
+}
+
+.footer-note {
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+    color: #999;
+    background-color: #fafafa;
+    border-top: 1px solid #eee;
+}
+
+/* Responsive */
+@media screen and (max-width: 600px) {
+    .email-container {
+        margin: 10px auto;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .hero {
+        padding: 30px 20px;
+    }
+    .credentials {
+        padding: 14px;
     }
 }
-/* iPhone 6, 6S, 7, 8, and X */
-@media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
-    u ~ div .email-container {
-        min-width: 375px !important;
-    }
-}
-/* iPhone 6+, 7+, and 8+ */
-@media only screen and (min-device-width: 414px) {
-    u ~ div .email-container {
-        min-width: 414px !important;
-    }
-}
-
-</style>
-
-
-<style>
-
-.primary{
-	background: #30e3ca;
-}
-.bg_white{
-	background: #ffffff;
-}
-.bg_light{
-	background: #fafafa;
-}
-.bg_black{
-	background: #000000;
-}
-.bg_dark{
-	background: rgba(0,0,0,.8);
-}
-.email-section{
-	padding:2.5em;
-}
-
-/*BUTTON*/
-.btn{
-	padding: 10px 15px;
-	display: inline-block;
-}
-.btn.btn-primary{
-	border-radius: 5px;
-	background: #e2930c !important;
-	color: #ffffff !important;
-    border: 2px solid #e2930c !important;
-}
-.btn.btn-white{
-	border-radius: 5px;
-	background: #ffffff;
-	color: #000000;
-}
-.btn.btn-white-outline{
-	border-radius: 5px;
-	background: transparent;
-	border: 1px solid #fff;
-	color: #fff;
-}
-.btn.btn-black-outline{
-	border-radius: 0px;
-	background: transparent;
-	border: 2px solid #000;
-	color: #000;
-	font-weight: 700;
-}
-
-h1,h2,h3,h4,h5,h6{
-	font-family: 'Helvetica', 'Roboto';
-	color: #000000;
-	margin-top: 0;
-	font-weight: 400;
-}
-
-body{
-	font-family: 'Helvetica', 'Roboto';
-	font-weight: 400;
-	font-size: 15px;
-	line-height: 1.8;
-	color: rgba(0,0,0,.4);
-}
-
-a{
-	color: #e2930c;
-}
-
-table{
-}
-/*LOGO*/
-
-.logo h1{
-	margin: 0;
-}
-.logo h1 a {
-	color: #e2930c !important;
-	font-size: 60px;
-	font-weight: 400;
-	font-family: 'Helvetica', 'Roboto';
-}
-
-/*HERO*/
-.hero{
-	position: relative;
-	z-index: 0;
-}
-
-.hero .text{
-	color: rgba(0,0,0,.3);
-}
-.hero .text h2{
-	color: #000;
-	font-size: 40px;
-	margin-bottom: 0;
-	font-weight: 400;
-	line-height: 1.4;
-}
-.hero .text h3{
-	font-size: 24px;
-	font-weight: 300;
-}
-.hero .text h2 span{
-	font-weight: 600;
-	color: #e2930c;
-}
-
-
-/*HEADING SECTION*/
-.heading-section{
-}
-.heading-section h2{
-	color: #000000;
-	font-size: 28px;
-	margin-top: 0;
-	line-height: 1.4;
-	font-weight: 400;
-}
-.heading-section .subheading{
-	margin-bottom: 20px !important;
-	display: inline-block;
-	font-size: 13px;
-	text-transform: uppercase;
-	letter-spacing: 2px;
-	color: rgba(0,0,0,.4);
-	position: relative;
-}
-.heading-section .subheading::after{
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: -10px;
-	content: '';
-	width: 100%;
-	height: 2px;
-	background: #e2930c;
-	margin: 0 auto;
-}
-
-.heading-section-white{
-	color: rgba(255,255,255,.8);
-}
-.heading-section-white h2{
-	font-family: 'Helvetica','Roboto';
-	line-height: 1;
-	padding-bottom: 0;
-}
-.heading-section-white h2{
-	color: #ffffff;
-}
-.heading-section-white .subheading{
-	margin-bottom: 0;
-	display: inline-block;
-	font-size: 13px;
-	text-transform: uppercase;
-	letter-spacing: 2px;
-	color: rgba(255,255,255,.4);
-}
-
-
-ul.social{
-	padding: 0;
-}
-ul.social li{
-	display: inline-block;
-	margin-right: 10px;
-}
-
-/*FOOTER*/
-
-.footer{
-	border-top: 1px solid rgba(0,0,0,.05);
-	color: rgba(0,0,0,.5);
-}
-.footer .heading{
-	color: #000;
-	font-size: 20px;
-}
-.footer ul{
-	margin: 0;
-	padding: 0;
-}
-.footer ul li{
-	list-style: none;
-	margin-bottom: 10px;
-}
-.footer ul li a{
-	color: rgba(0,0,0,1);
-}
-
-
-@media screen and (max-width: 500px) {
-
-
-}
-
 </style>
 <meta name="robots" content="noindex, follow">
 </head>
-<body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #efefef;">
-<center style="width: 100%; background-color: #efefef;">
-<div style="display: none; font-size: 1px;max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: 'Helvetica','Roboto';">
+<body width="100%" style="margin: 0; padding: 0; background-color: #f5f5f5;">
+<center>
+<div style="display: none; font-size: 1px; color: #ffffff; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
 &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
 </div>
-<div style="max-width: 600px; margin: 0 auto;" class="email-container">
-<br/>
-<table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
-<tr>
-<td valign="top" class="bg_white" style="padding: 1em 2.5em 0 2.5em;">
-<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr>
-<td class="logo" style="text-align: center;">
-<h3>SmartEventAi</h3>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-<tr>
-<td valign="middle" class="hero bg_white" style="padding: 2em 0 4em 0;">
-<table>
-<tr>
-<td>
- <div class="text" style="padding: 0 2.5em; text-align: center; line-height: 1.5;">
-    <h2>Bonjour {{ first_name }} {{ last_name }}!</h2>
-    <br/>
-    <h4>Avec votre reservation, un compte a été créé en votre nom avec l'adresse {{ username }} avec comme mot de passe {{ password }}.
-    </h4>
-    <p>Vous pouvez dès à présent vous connecter à votre compte en cliquant sur le lien ci-dessous :
-{{ login_url }}
 
-Merci de votre confiance et bienvenue parmi nous !
+<div class="email-container">
+  <div class="logo">
+    <h3>SmartEventAi</h3>
+  </div>
 
-Cordialement,
-L’équipe SmartEventAi</p><br/>
+  <div class="hero">
+    <h2>Bonjour {{ first_name }} {{ last_name }} !</h2>
+    <h4>Un compte a été automatiquement créé pour vous suite à votre réservation.</h4>
+
+    <div class="credentials">
+      <p><strong>Adresse e-mail :</strong> {{ username }}</p>
+      <p><strong>Mot de passe :</strong> {{ password }}</p>
+    </div>
+
+    <a href="{{ login_url }}" class="btn">Se connecter à mon compte</a>
+
+    <p class="message">
+      Merci de votre confiance et bienvenue parmi nous !<br><br>
+      Cordialement,<br>
+      L’équipe SmartEventAi
+    </p>
+  </div>
+
+  <div class="footer-note">
+    &copy; 2025 SmartEventAi. Tous droits réservés.
+  </div>
 </div>
-</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</div>
-<br/>
-<br/>
-<br/>
 </center>
 </body>
 </html>
