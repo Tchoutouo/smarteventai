@@ -62,3 +62,13 @@ Thumbs.db
 
 #Dump files
 db.sqlite3
+
+# AI MODELS
+ai_services/models/*
+!ai_services/models/.gitkeep    
+
+# Logs
+logs/*
+
+# cache files
+.cache
