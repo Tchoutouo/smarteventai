@@ -15,6 +15,12 @@ class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_deleted = models.BooleanField(default=False)
     ambassadors = models.ManyToManyField(User, blank=True, related_name='ambassador_events')
+    commission_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=5.00,  # en pourcentage : 10.00 = 10%
+        help_text="Commission pour les ambassadeurs (%)"
+    )
 
     cover_image = models.ImageField(
         upload_to='event_covers/',

@@ -83,6 +83,7 @@
       <div class="card-body">
         <p>Total des réservations : <strong>{{ total_reservations }}</strong></p>
         <p>Total des revenus : <strong>${{ total_revenue|floatformat:2 }}</strong></p>
+        <p>Pourcentage de recompense : <strong>{{ event.commission_rate|floatformat:2 }}%</strong></p>
         <table class="table table-hover">
             <thead class="table table-primary">
               <tr>
@@ -184,6 +185,8 @@
         <p>Réservations générées : <strong>{{ ambassador_reservations }}</strong></p>
         <p>Nombre de places : <strong>{{ total_places }}</strong></p>
         <p>Revenu attribué : <strong>${{ ambassador_revenue|floatformat:2 }}</strong></p>
+        <p>Pourcentage de recompense : <strong>{{ event.commission_rate|floatformat:2 }}%</strong></p>
+        <p>Total de recompense : <strong>${{ total_commission|floatformat:2 }}</strong></p>
       </div>
     </div>
 

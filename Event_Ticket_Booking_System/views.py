@@ -164,6 +164,19 @@ def ambassador_dashboard_view(request, secure_token):
         else:
             sold_out_tickets += 1
 
+    # Récupère toutes les ventes attribuées à l'ambassadeur
+    sales = Reservation.objects.filter(
+        ambassador=request.user
+    ).select_related('event')
+    # Calcule le total gagné
+    total_earned = Decimal('0.00')
+    for sale in sales:
+        print(sale, sale.event.commission_rate, sale.event.ticket_price)
+        commission = sale.total_price * (sale.event.commission_rate / Decimal('100.00'))
+        total_earned += commission
+
+    # print("total_earned", total_earned)
+
     commission = revenue * Decimal('0.10')
     net_sales = revenue - commission
     today = date.today()
@@ -188,6 +201,7 @@ def ambassador_dashboard_view(request, secure_token):
         'max_date': max_date.isoformat(),
         'greeting_message': greeting_message,
         'is_morning': is_morning,
+        "total_earned": total_earned
     }
     return render(request, 'ambassador_dashboard.html', context)
 
@@ -410,9 +424,16 @@ def event_secure_detail(request, secure_token, event_id):
         ambassador_revenue = ambassador_reservations.aggregate(total=Sum('total_price'))['total'] or 0
         # print(ambassador_revenue)
 
+        total_commission = Decimal('0.00')
+        for reservation in ambassador_reservations:
+            commission = reservation.total_price * (event.commission_rate / Decimal('100.00'))
+            total_commission += commission
+
+
         context['ambassador_reservations'] = nb_reservations
         context['ambassador_revenue'] = ambassador_revenue
         context['total_places'] = total_places
+        context['total_commission'] = total_commission
 
     return render(request, 'view_detail_event.html', context)
 
@@ -452,6 +473,7 @@ def event_create_view(request, secure_token):
         location = request.POST.get("location")
         date_str = request.POST.get("date")
         ticket_price = request.POST.get("ticket_price")
+        commission = request.POST.get("commission")
         available_tickets = request.POST.get("available_tickets")
 
         try:
@@ -472,7 +494,8 @@ def event_create_view(request, secure_token):
             date=event_date,
             ticket_price=ticket_price,
             available_tickets=available_tickets,
-            organizer=request.user
+            organizer=request.user,
+            commission_rate=commission,
         )
 
         # Ajouter l'image de couverture si fournie
